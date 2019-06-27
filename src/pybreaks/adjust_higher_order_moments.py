@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 
 import matplotlib.pyplot as plt
-from src.pybreaks.break_test import TsRelBreakBase
+from pybreaks.src.pybreaks.break_test import TsRelBreakBase
 import pandas as pd
 import numpy as np
 from datetime import datetime
-from src.pybreaks.breakadjustment.utils import df_conditional_temp_resample
-from src.pybreaks.model_poly_regress import HigherOrderRegression
+from pybreaks.src.pybreaks.breakadjustment.utils import df_conditional_temp_resample
+from pybreaks.src.pybreaks.model_poly_regress import HigherOrderRegression
 from scipy.interpolate import interp1d
 import statsmodels.api as sm
 from scipy.stats import ttest_rel, pearsonr
-from src.pybreaks.lmoments_ks import FitCDF
+from pybreaks.src.pybreaks.lmoments_ks import FitCDF
 import os
 
 '''

@@ -4,10 +4,10 @@ import pandas as pd
 from scipy.stats import fligner, mannwhitneyu, ranksums
 from scipy import stats
 import numpy as np
-from src.pybreaks.fligner import fk_test
-from src.pybreaks.breakadjustment.base import TsRelBreakBase
+from pybreaks.src.pybreaks.fligner import fk_test
+from pybreaks.src.pybreaks.base import TsRelBreakBase
 from collections import OrderedDict
-from src.pybreaks.utils import df_conditional_temp_resample
+from pybreaks.src.pybreaks.utils import df_conditional_temp_resample
 import copy
 
 '''
@@ -554,7 +554,7 @@ if __name__ == '__main__':
     TS_FULL, PLOTPATH = smart_import(GPI, CANNAME, REFNAME)
 
     for TIMEFRAME, BREAKTIME in zip(TIMEFRAMES, BREAKTIMES):
-        print BREAKTIME
+        print(BREAKTIME)
         TS = TS_FULL[TIMEFRAME[0]:TIMEFRAME[1]]
         ds = TsRelBreakTest(TS[CANNAME], TS[REFNAME], BREAKTIME, test_check_spearR_sig=(0, 0.01),
                             test_resample=('M', 0.3), bias_corr_method='linreg')

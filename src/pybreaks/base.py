@@ -6,7 +6,7 @@ from pytesmo.scaling import linreg_stored_params, linreg_params, \
 import pandas as pd
 from datetime import datetime
 import numpy as np
-from src.pybreaks.horizontal_errors import HorizontalVal
+from pybreaks.src.pybreaks.horizontal_errors import HorizontalVal
 import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.cbook as cbook
@@ -607,7 +607,7 @@ class TsRelBreakBase(object):
             columns = {props['candidate_name']: 'CAN', props['reference_name']: 'REF'}
 
         if not all([col in plot_df.columns for col in columns.keys()]):
-            print self.breaktime
+            print(self.breaktime)
             raise ValueError(columns, 'Cannot find column in data frame')
 
         plot_df = plot_df.rename(columns=columns)
@@ -695,7 +695,7 @@ class TsRelBreakBase(object):
 
         # text stats in last panel
         col_strs = []
-        for name, val in horizontal_errors.to_dict().iteritems():
+        for name, val in horizontal_errors.to_dict().items():
             col_strs.append('%s: %f' % (name, val))
         col_str = '\n'.join(col_strs)
         ax = plt.subplot(rows, cols, 13)

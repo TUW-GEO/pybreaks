@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from src.pybreaks.base import TsRelBreakBase
-from src.pybreaks.utils import df_conditional_temp_resample
+from pybreaks.src.pybreaks.base import TsRelBreakBase
+from pybreaks.src.pybreaks.utils import df_conditional_temp_resample
+from pybreaks.src.pybreaks.model_lin_regress import LinearRegression
+
+
 import pandas as pd
 
 class TsRelBreakDetect(TsRelBreakBase):
@@ -69,8 +72,6 @@ class TsRelBreakDetect(TsRelBreakBase):
 
 
         """
-        from breakadjustment.model_lin_regress import LinearRegression
-
         if use_adjusted_col:
             other_col_name = self.adjusted_col_name
         else:
@@ -123,8 +124,6 @@ class TsRelBreakDetect(TsRelBreakBase):
         min_date : datetime
             Date with the minimum SSE (where the break is)
         '''
-        from breakadjustment.model_lin_regress import LinearRegression
-
 
         df = input_df.copy(True) # type: pd.DataFrame
 
@@ -132,7 +131,7 @@ class TsRelBreakDetect(TsRelBreakBase):
             try:
                 can_col_name = self.adjusted_col_name
             except AttributeError:
-                print 'no adjusted values in dataframe for the current class'
+                print('no adjusted values in dataframe for the current class')
                 return None
         else:
             can_col_name = self.candidate_col_name
@@ -186,45 +185,3 @@ class TsRelBreakDetect(TsRelBreakBase):
 
         model = self._fit_single_regress_model(use_adj_col)
         return model.residuals_autocorr(lags)
-
-
-if __name__ == '__main__':
-    from cci_breaks.cci_timeframes import CCITimes
-    from data_read_write.otherfunctions import smart_import
-    from datetime import datetime
-    from breakadjustment.break_test import TsRelBreakTest
-
-
-
-    gpi = 325278
-
-    timeframe = [datetime(1998,1,1), datetime(2007,1,1)]
-    breaktime = datetime(2002,6,19)
-
-    canname = 'CCI'
-    refname = 'REF'
-    adjname ='ADJ'
-
-    ts_full, plotpath = smart_import(gpi, canname, refname, adjname)
-
-
-
-    times = CCITimes('CCI_41_COMBINED', min_set_days=None, skip_breaktimes=[1, 3]).\
-        get_times(gpi=gpi)
-    breaktimes, timeframes = times['breaktimes'], times['timeframes']
-
-
-    for timeframe, breaktime in zip(timeframes, breaktimes):
-        print breaktime
-        ts = ts_full[timeframe[0]:timeframe[1]]
-        ds = TsRelBreakTest(ts[canname], ts[refname], breaktime, test_check_spearR_sig=(0, 0.01),
-                            test_resample=('M', 0.3), bias_corr_method='cdf_match')
-        isbreak, breaktype, testresult, errorcode = ds.run_tests(mean_test='wilkoxon',
-                                                                 var_test='scipy_fligner_killeen',
-                                                                 alpha=0.01)
-
-        if isbreak:
-            ts = ts_full.loc[timeframe[0]:timeframe[1], (canname, refname)]
-            ds = TsRelBreakDetect(candidate=ts[canname], reference=ts[refname],
-                                  breaktime=breaktime)
-            sse, date = ds.sse_around_breaktime(ds.df_resampled, 20)

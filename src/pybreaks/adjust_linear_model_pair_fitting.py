@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import matplotlib.pyplot as plt
-from src.pybreaks.break_test import TsRelBreakBase
-from src.pybreaks.model_lin_regress import LinearRegression
+from pybreaks.src.pybreaks.base import TsRelBreakBase
+from pybreaks.src.pybreaks.model_lin_regress import LinearRegression
 
 import pandas as pd
 import numpy as np
 from datetime import datetime
-from src.pybreaks.breakadjustment.utils import df_conditional_temp_resample, \
+from pybreaks.src.pybreaks.utils import df_conditional_temp_resample, \
     days_in_month, mid_month_target_values
 import os
 from scipy.interpolate import interp1d

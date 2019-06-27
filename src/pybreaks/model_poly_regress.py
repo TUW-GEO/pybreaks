@@ -3,11 +3,9 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy import stats
-from breakadjustment.utils import filter_by_quantiles
-from base import TsRelBreakBase
+from pybreaks.src.pybreaks.utils import filter_by_quantiles, autocorr
+from pybreaks.src.pybreaks.base import TsRelBreakBase
 import pandas as pd
-from utils import autocorr
 import matplotlib.lines as mlines
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import LinearRegression

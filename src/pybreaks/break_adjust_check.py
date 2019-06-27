@@ -2,21 +2,12 @@
 
 import scipy.stats as stats
 import pandas as pd
-import matplotlib.pyplot as plt
-from collections import OrderedDict
-import math
 import numpy as np
 import calendar
 from datetime import datetime
 
-from src.pybreaks.adjust_linear_model_pair_fitting import RegressPairFit, PairRegressMatchAdjust
-from src.pybreaks.base import TsRelBreakBase
-from src.pybreaks.break_test import TsRelBreakTest
-from src.pybreaks.adjust_freq_quantile_matching import QuantileCatMatch, QuantileCatMatchAdjust
-from src.pybreaks.adjust_higher_order_moments import HigherOrderMoments, HigherOrderMomentsAdjust
-from src.pybreaks.temp_coverage import compare_temp_cov, drop_months_data
-from src.pybreaks.utils import merge_dicts
-import warnings
+from pybreaks.src.pybreaks.base import TsRelBreakBase
+from pybreaks.src.pybreaks.temp_coverage import compare_temp_cov
 
 class BreakAdjustInputCheck(TsRelBreakBase):
     """
@@ -279,9 +270,9 @@ class BreakAdjustInputCheck(TsRelBreakBase):
 
 
 if __name__ == '__main__':
-    from CCIBreaks.cci_timeframes import CCITimes
+    from cci_breaks.cci_timeframes import CCITimes
     import os
-    from CCIBreaks.otherfunctions import smart_import
+    from data_read_write.otherfunctions import smart_import
 
     qdegdata = False
     gpi = 402962  # bad: 395790,402962

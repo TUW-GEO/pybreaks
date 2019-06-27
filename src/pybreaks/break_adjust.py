@@ -5,15 +5,15 @@ import matplotlib.pyplot as plt
 from collections import OrderedDict
 import math
 from datetime import datetime
-from src.pybreaks.base import TsRelBreakBase
-from src.pybreaks.break_test import TsRelBreakTest
-from src.pybreaks.adjust_linear_model_pair_fitting import RegressPairFit
-from src.pybreaks.adjust_freq_quantile_matching import QuantileCatMatch, N_Quantile_Exception
-from src.pybreaks.adjust_higher_order_moments import HigherOrderMoments
-from src.pybreaks.temp_coverage import drop_months_data
-from src.pybreaks.utils import merge_dicts
+from pybreaks.src.pybreaks.base import TsRelBreakBase
+from pybreaks.src.pybreaks.break_test import TsRelBreakTest
+from pybreaks.src.pybreaks.adjust_linear_model_pair_fitting import RegressPairFit
+from pybreaks.src.pybreaks.adjust_freq_quantile_matching import QuantileCatMatch, N_Quantile_Exception
+from pybreaks.src.pybreaks.adjust_higher_order_moments import HigherOrderMoments
+from pybreaks.src.pybreaks.temp_coverage import drop_months_data
+from pybreaks.src.pybreaks.utils import merge_dicts
 import warnings
-from src.pybreaks.break_adjust_check import BreakAdjustInputCheck
+from pybreaks.src.pybreaks.break_adjust_check import BreakAdjustInputCheck
 import copy
 import numpy as np
 import os
@@ -1064,7 +1064,7 @@ def usecase_qcm():
     group_stats, vertical_metrics, hor_errors, checkstats = \
         ds.get_results()
 
-    print stillbreak
+    print(stillbreak)
     if ds.adjusted_col_name and not stillbreak and error == 0:
         ts_full.loc[data_adjusted.index, 'candidate'] = \
             data_adjusted[ds.adjusted_col_name]
@@ -1142,7 +1142,7 @@ def usecase_hom():
     group_stats, vertical_metrics, hor_errors, checkstats = \
         ds.get_results()
 
-    print stillbreak
+    print(stillbreak)
     if ds.adjusted_col_name and not stillbreak and error == 0:
         ts_full.loc[data_adjusted.index, 'candidate'] = \
             data_adjusted[ds.adjusted_col_name]
@@ -1223,7 +1223,7 @@ def usecase_lmp():
     group_stats, vertical_metrics, hor_errors, checkstats = \
         ds.get_results()
 
-    print stillbreak
+    print(stillbreak)
     if ds.adjusted_col_name and not stillbreak and error == 0:
         ts_full.loc[data_adjusted.index, 'candidate'] = \
             data_adjusted[ds.adjusted_col_name]
