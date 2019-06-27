@@ -5,15 +5,15 @@ import matplotlib.pyplot as plt
 from collections import OrderedDict
 import math
 from datetime import datetime
-from base import TsRelBreakBase
-from break_test import TsRelBreakTest
-from adjust_linear_model_pair_fitting import RegressPairFit
-from adjust_freq_quantile_matching import QuantileCatMatch, N_Quantile_Exception
-from adjust_higher_order_moments import HigherOrderMoments
-from temp_coverage import drop_months_data
-from utils import merge_dicts
+from src.pybreaks.base import TsRelBreakBase
+from src.pybreaks.break_test import TsRelBreakTest
+from src.pybreaks.adjust_linear_model_pair_fitting import RegressPairFit
+from src.pybreaks.adjust_freq_quantile_matching import QuantileCatMatch, N_Quantile_Exception
+from src.pybreaks.adjust_higher_order_moments import HigherOrderMoments
+from src.pybreaks.temp_coverage import drop_months_data
+from src.pybreaks.utils import merge_dicts
 import warnings
-from break_adjust_check import BreakAdjustInputCheck
+from src.pybreaks.break_adjust_check import BreakAdjustInputCheck
 import copy
 import numpy as np
 import os

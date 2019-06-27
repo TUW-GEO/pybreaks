@@ -4,10 +4,10 @@ import pandas as pd
 from scipy.stats import fligner, mannwhitneyu, ranksums
 from scipy import stats
 import numpy as np
-from fligner import fk_test
-from breakadjustment.base import TsRelBreakBase
+from src.pybreaks.fligner import fk_test
+from src.pybreaks.breakadjustment.base import TsRelBreakBase
 from collections import OrderedDict
-from utils import df_conditional_temp_resample
+from src.pybreaks.utils import df_conditional_temp_resample
 import copy
 
 '''

@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats
 from statsmodels.distributions.empirical_distribution import ECDF
-import lmoments as lm
+from lmoments3 import distr
 from functools import partial
 
 '''
@@ -14,8 +14,7 @@ empirical distributions from passed observations and a Kolmogorov-Smirnoff test
 to decide which CDF is matching best (minimize D stats.)
 
 TODO #################################
-(++) the gpa dist is not working yet.
-(++) the wakeby dist is not working yet.
+(+) Wakeby and GPA not working yet.
 (+) Implement plot_quantiles function.
 
 NOTES ################################
@@ -23,13 +22,11 @@ NOTES ################################
 - an alternative to the KS test could be a max likelihood fit.
 '''
 
-
 class FitCDF(object):
     '''
     Find the best fitting CDF to a set of passed values using a L-moments approach
     together with a KS test.
     '''
-
     def __init__(self, src, types=None):
         """
         Fit the most likely distribution to the passed data.
@@ -75,51 +72,57 @@ class FitCDF(object):
         return np.array(quant)
 
     @staticmethod
-    def _nor(dat, l):
+    def _nor(dat):
         """Fit a Normal Distribution"""
-        para = lm.pelnor(lm.samlmu(dat, l))
-        _cdf = partial(lm.cdfnor, para=para)
-        _pdf = partial(lm.pdfnor, para=para)
+        para = distr.nor.lmom_fit(dat)
+        #para = lm.pelnor(lm.samlmu(dat, l))
+        _cdf = partial(distr.nor.cdf, **para)
+        _pdf = partial(distr.nor.pdf, **para)
         return para, _cdf, _pdf
 
     @staticmethod
-    def _wak(dat, l):
+    def _wak(dat):
         """Fit a wakeby distribution"""
-        para = lm.pelwak(lm.samlmu(dat, l))
-        _cdf = partial(lm.cdfwak, para=para)
-        _pdf = partial(lm.pdfwak, para=para)
+        para = distr.wak.lmom_fit(dat)
+        #para = lm.pelwak(lm.samlmu(dat, l))
+        _cdf = partial(distr.wak.cdf, **para)
+        _pdf = partial(distr.wak.pdf, **para)
         return para, _cdf, _pdf
 
     @staticmethod
-    def _gno(dat, l):
+    def _gno(dat):
         """Fit a Generalized Normal Dist"""
-        para = lm.pelgno(lm.samlmu(dat, l))
-        _cdf = partial(lm.cdfgno, para=para)
-        _pdf = partial(lm.pdfgno, para=para)
+        para = distr.gno.lmom_fit(dat)
+        #para = lm.pelgno(lm.samlmu(dat, l))
+        _cdf = partial(distr.gno.cdf, **para)
+        _pdf = partial(distr.gno.pdf, **para)
         return para, _cdf, _pdf
 
     @staticmethod
-    def _pe3(dat, l):
+    def _pe3(dat):
         """Fit a Pearson type 3 distribution"""
-        para = lm.pelpe3(lm.samlmu(dat, l))
-        _cdf = partial(lm.cdfpe3, para=para)
-        _pdf = partial(lm.pdfpe3, para=para)
+        para = distr.pe3.lmom_fit(dat)
+        #para = lm.pelpe3(lm.samlmu(dat, l))
+        _cdf = partial(distr.pe3.cdf, **para)
+        _pdf = partial(distr.pe3.pdf, **para)
         return para, _cdf, _pdf
 
     @staticmethod
-    def _gpa(dat, l):
+    def _gpa(dat):
         """Fit a Generalised Pareto distribution"""
-        para = lm.pelgpa(lm.samlmu(dat, l))
-        _cdf = partial(lm.cdfgpa, para=para)
-        _pdf = partial(lm.pdfgpa, para=para)
+        para = distr.gpa.lmom_fit(dat)
+        #para = lm.pelgpa(lm.samlmu(dat, l))
+        _cdf = partial(distr.gpa.cdf, **para)
+        _pdf = partial(distr.gpa.pdf, **para)
         return para, _cdf, _pdf
 
     @staticmethod
-    def _gev(dat, l):
+    def _gev(dat):
         """Fit a Generalised Extreme Value distribution"""
-        para = lm.pelgev(lm.samlmu(dat, l))
-        _cdf = partial(lm.cdfgev, para=para)
-        _pdf = partial(lm.pdfgev, para=para)
+        para = distr.gev.lmom_fit(dat)
+        #para = lm.pelgev(lm.samlmu(dat, l))
+        _cdf = partial(distr.gev.cdf, **para)
+        _pdf = partial(distr.gev.pdf, **para)
         return para, _cdf, _pdf
 
     def _find_cdf(self, types):
@@ -144,59 +147,55 @@ class FitCDF(object):
             Lmoments cdf/pdf parameters
         """
         # Moments for the dists
-        L = {'nor': 2, 'pe3': 3, 'gno': 3, 'gev': 3, 'wak': 5}  # 'gpa': 3
         if types is None:
-            types = L.keys()
+            types = ['nor', 'pe3', 'gno', 'gev'] # 'wak', 'gpa'
 
         dat = self.src
         dists, done = {}, []
 
         if 'nor' in types:  # normal dist
             name = 'nor'
-            para, _cdf, _pdf = self._nor(dat, L[name])
+            para, _cdf, _pdf = self._nor(dat)
             dists.update({name: {'cdf': _cdf, 'pdf': _pdf, 'para': para}})
             done.append(name)
 
         if 'pe3' in types:  # pearson typ3
             name = 'pe3'
-            para, _cdf, _pdf = self._pe3(dat, L[name])
+            para, _cdf, _pdf = self._pe3(dat)
             dists.update({name: {'cdf': _cdf, 'pdf': _pdf, 'para': para}})
             done.append(name)
 
         if 'gno' in types:  # generalized normal
             name = 'gno'
-            para, _cdf, _pdf = self._gno(dat, L[name])
+            para, _cdf, _pdf = self._gno(dat)
             dists.update({name: {'cdf': _cdf, 'pdf': _pdf, 'para': para}})
             done.append(name)
 
-        ''' # this raises Invalid Parameter error
         if 'gpa' in types: # generalized pareto
             name = 'gpa'
-            para, _cdf, _pdf = self._gpa(dat, L[name])
+            para, _cdf, _pdf = self._gpa(dat)
             dists.update({name: {'cdf': _cdf, 'pdf': _pdf, 'para': para}})
             done.append(name)
-        '''
 
         if 'gev' in types:  # generalized extreme value
             name = 'gev'
-            para, _cdf, _pdf = self._gev(dat, L[name])
+            para, _cdf, _pdf = self._gev(dat)
             dists.update({name: {'cdf': _cdf, 'pdf': _pdf, 'para': para}})
             done.append(name)
-        '''
+
         if 'wak' in types: # wakeby
-            # todo: this raises exception in L199
             name = 'wak'
-            para, _cdf, _pdf = self._wak(dat, L[name])
+            para, _cdf, _pdf = self._wak(dat)
             dists.update({name: {'cdf': _cdf, 'pdf': _pdf, 'para': para}})
             done.append(name)
-        '''
+
         if not all([d in types for d in done]):
             raise ValueError([n for n in types if n not in done], 'PDF type is not supported')
 
         best_fit = {'name': None, 'D': 1, 'p': 0}
         # Better fit = smaller D and larger p
         # HOM only uses the p values for detecting the best distribution (ignoring D)?
-        for name, dist in dists.iteritems():
+        for name, dist in dists.items():
             ecdf = ECDF(dat)
             emp = sorted(ecdf.y)
             x = sorted(dat)

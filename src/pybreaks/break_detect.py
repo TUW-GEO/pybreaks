@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from breakadjustment.base import TsRelBreakBase
-from utils import df_conditional_temp_resample
+from src.pybreaks.base import TsRelBreakBase
+from src.pybreaks.utils import df_conditional_temp_resample
 import pandas as pd
 
 class TsRelBreakDetect(TsRelBreakBase):

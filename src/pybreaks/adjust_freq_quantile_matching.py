@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from break_test import TsRelBreakBase
+from src.pybreaks.base import TsRelBreakBase
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt

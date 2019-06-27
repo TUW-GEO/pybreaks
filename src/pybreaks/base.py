@@ -6,7 +6,7 @@ from pytesmo.scaling import linreg_stored_params, linreg_params, \
 import pandas as pd
 from datetime import datetime
 import numpy as np
-from breakadjustment.horizontal_errors import HorizontalVal
+from src.pybreaks.horizontal_errors import HorizontalVal
 import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.cbook as cbook
