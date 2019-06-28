@@ -583,7 +583,7 @@ class TsRelMultiBreak(TsRelBreakBase):
         if save_path:
             if not os.path.isdir(save_path):
                 os.mkdir(save_path)
-            for breaktime, figure in self.model_figures.iteritems():
+            for breaktime, figure in self.model_figures.items():
                 gpi_st = str(gpi) + '_' if gpi else ''
                 filename = '%s%s_models.png' % (gpi_st, str(breaktime.date()))
                 plt.tight_layout()
@@ -611,13 +611,13 @@ class TsRelMultiBreak(TsRelBreakBase):
         if save_path:
             if not os.path.isdir(save_path):
                 os.mkdir(save_path)
-            for breaktime, figure in self.tsstats_figures.iteritems():
+            for breaktime, figure in self.tsstats_figures.items():
                 gpi_str = str(gpi) + '_' if gpi else ''
                 filename = '%s%s_tsstats_frames.png' % (gpi_str, str(breaktime.date()))
                 figure.savefig(os.path.join(save_path, filename))
                 plt.close(figure)
         else:
-            for breaktime, figure in self.tsstats_figures.iteritems():
+            for breaktime, figure in self.tsstats_figures.items():
                 figure.show()
 
     def _gen_adjust_frame(self, breaktime, extended_reference, adjust_group):

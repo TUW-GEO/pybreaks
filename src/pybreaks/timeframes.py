@@ -226,7 +226,7 @@ class TsTimeFrames(object):
                      'left': [bt_after[0]] + bt_before.tolist() + [self.ranges[0]]}
 
         timeframes = {'left':[], 'right':[]}
-        for side, time in times.iteritems():
+        for side, time in times.items():
             if time is None:
                 timeframes[side] = None
                 continue
@@ -281,7 +281,7 @@ class TsTimeFrames(object):
         return_times = []
         for i, time in enumerate(timeset):
             if isinstance(time, dict):
-                for condition, value in time.iteritems():
+                for condition, value in time.items():
                     if eval(condition):
                         for v in value:
                             if v not in return_times:
@@ -355,7 +355,7 @@ class TsTimeFrames(object):
             if isinstance(d, dict):
                 longest_condition_name = None
                 longest_condition_size = 0
-                for condition, values in d.iteritems():
+                for condition, values in d.items():
                     if len(values) >= longest_condition_size:
                         longest_condition_name = condition
                         longest_condition_size = len(values)
@@ -413,7 +413,7 @@ class TsTimeFrames(object):
             return_times['timeframes'] = [self.as_datetimes(timeframe) for timeframe in return_times['timeframes']]
             return_times['ranges'] = self.as_datetimes(return_times['ranges'])
 
-        for name, data in return_times.iteritems():
+        for name, data in return_times.items():
             return_times[name] = np.array(data)
 
         return return_times
@@ -574,9 +574,6 @@ class TsTimeFrames(object):
             sorted = times[times[:, 0].argsort()]
 
         return sorted
-
-
-
 
 
 if __name__ == '__main__':

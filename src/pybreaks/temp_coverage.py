@@ -33,7 +33,7 @@ def count_M(dt, first_should, last_should):
     index_full = pd.PeriodIndex(start=first_should, end=last_should, freq='M')
 
     max_month_counter, is_months_counter = {}, {}
-    for month, indices_per_month in index_full.groupby(index_full.month).iteritems():
+    for month, indices_per_month in index_full.groupby(index_full.month).items():
         count = indices_per_month.size
         max_month_counter[int(month)] = count
 
@@ -41,7 +41,7 @@ def count_M(dt, first_should, last_should):
     df_count = df_count.rename(columns={0: 'months_max'})
     df_count.index.name = 'month'
 
-    for month, indices_per_month in dt.groupby(dt.month).iteritems():
+    for month, indices_per_month in dt.groupby(dt.month).items():
         count = indices_per_month.size
         is_months_counter[month] = count
 
@@ -83,7 +83,7 @@ def count_D(dt, first_should, last_should):
     index_full = pd.DatetimeIndex(start=first_should, end=last_should, freq='D')
 
     max_days_counter, is_days_counter = {}, {}
-    for month, indices_per_month in index_full.groupby(index_full.month).iteritems():
+    for month, indices_per_month in index_full.groupby(index_full.month).items():
         count = indices_per_month.size
         max_days_counter[int(month)] = count
 
@@ -91,7 +91,7 @@ def count_D(dt, first_should, last_should):
     df_count = df_count.rename(columns={0: 'days_max'})
     df_count.index.name = 'month'
 
-    for month, indices_per_month in dt.groupby(dt.month).iteritems():
+    for month, indices_per_month in dt.groupby(dt.month).items():
         count = indices_per_month.size
         is_days_counter[month] = count
 

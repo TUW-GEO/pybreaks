@@ -5,7 +5,7 @@ from pybreaks.src.pybreaks.break_test import TsRelBreakBase
 import pandas as pd
 import numpy as np
 from datetime import datetime
-from pybreaks.src.pybreaks.breakadjustment.utils import df_conditional_temp_resample
+from pybreaks.src.pybreaks.utils import df_conditional_temp_resample
 from pybreaks.src.pybreaks.model_poly_regress import HigherOrderRegression
 from scipy.interpolate import interp1d
 import statsmodels.api as sm

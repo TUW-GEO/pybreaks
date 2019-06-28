@@ -1013,7 +1013,7 @@ class QuantileCatMatchAdjust(object):
 def usecase():
     from cci_breaks.cci_timeframes import CCITimes
     from data_read_write.otherfunctions import smart_import
-    from break_test import TsRelBreakTest
+    from pybreaks.src.pybreaks.break_test import TsRelBreakTest
     from datetime import datetime
 
     gpi = 444772  # bad: 395790,402962

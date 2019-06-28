@@ -476,11 +476,11 @@ class TsRelBreakTest(TsRelBreakBase):
             The combined input dicts
         """
         merged_test_results = {}
-        for testtype, testresults in test_results_dict.iteritems():
-            for name, val in testresults.iteritems():
+        for testtype, testresults in test_results_dict.items():
+            for name, val in testresults.items():
                 if name == 'stats':
                     if isinstance(val, dict):
-                        for n, v in val.iteritems():
+                        for n, v in val.items():
                             merged_test_results['%s_%s' % (n, testtype.upper())] = v
                     else:
                         continue
