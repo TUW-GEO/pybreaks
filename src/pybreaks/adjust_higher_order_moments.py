@@ -23,10 +23,11 @@ be applied to an extended set of input values.
 '''
 
 # TODO #################################
-# (+) Add wakeby and GPA dist
+# (+) WAK and GPA seem not to work properly in the lmoments package.
 
 # NOTES ################################
-# - The significance test for the means differences is probably never significant?
+# - Selection of poly order could be based on comparing distributions of residuals
+#   with models of different order (ttest, significantly lower mean of residuals)
 
 
 def quant_bin(cdf, ds, n_bins=None):

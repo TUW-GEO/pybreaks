@@ -17,7 +17,7 @@ Module implements the quantile matching adjustment (Wang 2010, Vincent 2012)
 for breaks in soil moisture observation time series.
 
 TODO #################################
-(+) add a function to both classes to plot the adjustments only, as done for the
+(-) add a function to both classes to plot the adjustments only, as done for the
     other 2 correction classes.
 
 NOTES ################################
@@ -104,9 +104,9 @@ class QuantileCatMatch(TsRelBreakBase):
 
         Parameters
         ----------
-        candidate : pandas.Series
+        candidate : pd.Series
             Candidate data that should be adjusted
-        reference : pandas.Series
+        reference : pd.Series
             Reference data that is used to fit candidate data to
         breaktime : datetime.datetime
             Time of the detected break
@@ -130,8 +130,8 @@ class QuantileCatMatch(TsRelBreakBase):
             Select mean or median to fit the QC means or medians.
         '''
 
-        candidate = candidate.copy(True) # type: pd.Series
-        reference = reference.copy(True) # type: pd.Series
+        candidate = candidate.copy(True)
+        reference = reference.copy(True)
 
         candidate.name = 'can'
         reference.name = 'ref'
