@@ -7,7 +7,7 @@ Module to calculate error metrics for a CAN and a REF series grouped by a date
 import pandas as pd
 from datetime import datetime
 import numpy as np
-from scipy import stats
+from scipy import stats as scistats
 from pytesmo import metrics
 
 
@@ -49,9 +49,12 @@ def compare(v0, v1, how='AbsDiff'):
 
 
 class HorizontalVal(object):
-    ''' Create group stats, calc horizontal metrics and horizontal errors'''
+    """
+    Calculate statistics for a candidate and reference in each group,
+    and across the 2 groups
+    """
     def __init__(self, candidate, reference, breaktime):
-        '''
+        """
         Initialze the object for horizontal cci_validation.
 
         Parameters
@@ -62,7 +65,8 @@ class HorizontalVal(object):
             The reference series (no bias!)
         breaktime : datetime
             Time to split the candidate and reference into 2 sets
-        '''
+            The breaktime is part of group 1 TODO: It should belong to group 2
+        """
         self.candidate_name = candidate.name
         self.reference_name = reference.name
 
@@ -72,14 +76,213 @@ class HorizontalVal(object):
         self.breaktime = breaktime
 
         self.set0 = self.df.loc[:breaktime]
-        self.set1 = self.df.loc[breaktime:]
+        self.set1 = self.df.loc[breaktime + pd.DateOffset(1):]
         self.setfull = self.df.copy(True)
 
-        self.basic_measures = np.array([('mean', 'Diff'), ('median', 'Diff'),
-                                        ('min', 'Diff'), ('max', 'Diff'),
-                                        ('var', 'Ratio'), ('iqr', 'Ratio')])
+        # this method is the INITIAL comparison (within the group)
+        self.stats = np.array([('mean', 'Diff'),
+                               ('median', 'Diff'),
+                               ('min', 'Diff'),
+                               ('max', 'Diff'),
+                               ('var', 'Ratio'),
+                               ('iqr', 'Ratio')])
 
-        self.pytesmo_measures = ['bias', 'mad', 'rmsd', 'nrmsd']
+        # for these metrics, the comparison will be always Diff
+        self.metrics = np.array(['bias', 'mad', 'rmsd', 'nrmsd',
+                                 'PearsonR', 'SpearmanR'])
+
+    def _get_group_stats(self, can=True, ref=True):
+        if can and ref:
+            return self.df_group_stats
+        elif can:
+            return self.df_group_stats[self.df_group_stats.index.str.contains(self.candidate_name)]
+        elif ref:
+            return self.df_group_stats[self.df_group_stats.index.str.contains(self.reference_name)]
+        else:
+            return None
+
+    def _calc_stats(self):
+        """
+        Calculate the statistical values needed for comparison within and
+        across groups.
+
+        Returns
+        -------
+        group_stats : pd.DataFrame
+            Frame that contains the group stats
+        """
+        df_group_stats = pd.DataFrame()
+        basic_measures = self.stats[:, 0]
+
+        for group_no, subset_data in enumerate([self.set0, self.set1, self.setfull]):
+            if group_no in [0, 1]:
+                group = 'group%i' % group_no
+            else:
+                group = 'FRAME'
+            for name in [self.candidate_name, self.reference_name]:
+                # Basic measures
+                if 'min' in basic_measures:
+                    min = np.nan if subset_data[name].empty else \
+                        np.min(subset_data[name].values)
+                    df_group_stats.at['min_%s' % name, '%s' % group] = min
+                if 'max' in basic_measures:
+                    max = np.nan if subset_data[name].empty else \
+                        np.max(subset_data[name].values)
+                    df_group_stats.at['max_%s' % name, '%s' % group] = max
+                if 'var' in basic_measures:
+                    var = np.nan if subset_data[name].empty else \
+                        np.var(subset_data[name].values)
+                    df_group_stats.at['var_%s' % name, '%s' % group] = var
+                if 'mean' in basic_measures:
+                    mean = np.nan if subset_data[name].empty else \
+                        np.mean(subset_data[name].values)
+                    df_group_stats.at['mean_%s' % name, '%s' % group] = mean
+                if 'median' in basic_measures:
+                    median = np.nan if subset_data[name].empty else \
+                        np.median(subset_data[name].values)
+                    df_group_stats.at['median_%s' % name, '%s' % group] = median
+                if 'iqr' in basic_measures:
+                    iqr = np.nan if subset_data[name].empty else \
+                        scistats.iqr(subset_data[name].values, nan_policy='omit')
+                    df_group_stats.at['iqr_%s' % name, '%s' % group] = iqr
+
+        return df_group_stats
+
+    def _calc_stats_compare(self):
+        """
+        Compare stats within a group.
+        We find e.g. the difference in min, max, mean between the candidate and
+        reference of each group.
+
+        Returns
+        -------
+        df_groupstats_compare: pd.DataFrame
+            Metric comparison of the groups
+        """
+        df_groupstats_compare = pd.DataFrame()
+
+        # from basic stats
+        for var, meth in self.stats:
+            for group in ['group0', 'group1', 'FRAME']:
+                candidate_metric = self.df_group_stats.loc[
+                    '{}_{}'.format(var, self.candidate_name), group]
+                reference_metric = self.df_group_stats.loc[
+                    '{}_{}'.format(var, self.reference_name), group]
+
+                vmetric = compare(candidate_metric, reference_metric, meth)
+
+                df_groupstats_compare.at['%s_%s' % (var, meth), group] = vmetric
+
+        return df_groupstats_compare
+
+
+    def _calc_metric_change(self, df_groupstats_compare, df_validation_metrics,
+                            how='Diff'):
+        '''
+        Compare changes in  metrics across the the 2 groups
+        via the passed comparison function (usually difference).
+
+        Parameters
+        ----------
+        df_groupstats_compare : pd.DataFrame
+            DataFrame that contains the group stats
+        df_validation_metrics : pd.DataFrame
+            DataFrame that contains the group metrics
+        how : str, optional (default: 'Diff')
+            Method how the groups are compared, by default use the difference
+
+        Returns
+        -------
+        df_metric_change : pd.DataFrame
+            Change of metrics between the groups across the break time.
+        '''
+
+        df_metric_change = pd.Series()
+
+        for var, meth in self.stats:
+            s0 = df_groupstats_compare.loc['%s_%s' % (var, meth), 'group0']
+            s1 = df_groupstats_compare.loc['%s_%s' % (var, meth), 'group1']
+            hmetric = compare(s0, s1, how)
+            df_metric_change.at['%s_%s_%s' % (how, var, meth)] = hmetric
+
+        for var in self.metrics:
+            s0 = df_validation_metrics.loc[var, 'group0']
+            s1 = df_validation_metrics.loc[var, 'group1']
+            hmetric = compare(s0, s1, how)
+            df_metric_change.at['%s_%s' % (how, var)] = hmetric
+
+        return df_metric_change
+
+    def _calc_validation_metrics(self):
+        """
+        Calculate vertical metrics between candidate and reference using pytesmo.
+
+        Currently implemented:
+            bias, mad, rmsd, nrmsd,
+        Returns
+        -------
+        df_validation_metrics: pd.DataFrame
+            Data Frame that contains the metrics between the candidate and reference
+            for the 2 groups
+        """
+        df_validation_metrics = pd.DataFrame()
+
+        for group_no, subset_data in enumerate([self.set0, self.set1, self.setfull]):
+            if group_no in [0,1]:
+                group = 'group%i' % group_no
+            else:
+                group = 'FRAME'
+            if 'bias' in self.metrics:
+                if any([subset_data[col].empty for col in [self.candidate_name, self.reference_name]]):
+                    bias = np.nan
+                else:
+                    bias =metrics.bias(subset_data[self.reference_name].values,
+                                       subset_data[self.candidate_name].values)
+                df_validation_metrics.at['bias', '%s' % group] = bias
+
+            if 'mad' in self.metrics:
+                if any([subset_data[col].empty for col in [self.candidate_name, self.reference_name]]):
+                    mad = np.nan
+                else:
+                    mad =metrics.mad(subset_data[self.reference_name].values,
+                                     subset_data[self.candidate_name].values)
+                df_validation_metrics.at['mad', '%s' % group] = mad
+
+            if 'rmsd' in self.metrics:
+                if any([subset_data[col].empty for col in [self.candidate_name, self.reference_name]]):
+                    rmsd = np.nan
+                else:
+                    rmsd =metrics.rmsd(subset_data[self.reference_name].values,
+                                       subset_data[self.candidate_name].values)
+                df_validation_metrics.at['rmsd', '%s' % group] = rmsd
+
+            if 'nrmsd' in self.metrics:
+                if any([subset_data[col].empty for col in [self.candidate_name, self.reference_name]]):
+                    nrmsd = np.nan
+                else:
+                    nrmsd =metrics.nrmsd(subset_data[self.reference_name].values,
+                                         subset_data[self.candidate_name].values)
+                df_validation_metrics.at['nrmsd', '%s' % group] = nrmsd
+
+            if 'PearsonR' in self.metrics:
+                if any([subset_data[col].empty for col in [self.candidate_name, self.reference_name]]):
+                    pr, pp = np.nan, np.nan
+                else:
+                    pr, pp =metrics.pearsonr(subset_data[self.reference_name].values,
+                                             subset_data[self.candidate_name].values)
+                df_validation_metrics.at['PearsonR', '%s' % group] = pr
+                df_validation_metrics.at['Pp', '%s' % group] = pp
+
+            if 'SpearmanR' in self.metrics:
+                if any([subset_data[col].empty for col in [self.candidate_name, self.reference_name]]):
+                    sr, sp = np.nan, np.nan
+                else:
+                    sr, sp = metrics.spearmanr(subset_data[self.reference_name].values,
+                                               subset_data[self.candidate_name].values)
+                df_validation_metrics.at['SpearmanR', '%s' % group] = sr
+                df_validation_metrics.at['Sp', '%s' % group] = sp
+
+        return df_validation_metrics
 
 
     def run(self, comparison_method='Diff'):
@@ -88,199 +291,34 @@ class HorizontalVal(object):
 
         Parameters
         ----------
-        comparison_method
+        comparison_method : str, optional (default: Diff)
+            How the metrics across the groups are compared. Default
+            is the difference between group 1 and group 2.
 
         Returns
         -------
+        df_metric_change : pd.DataFrame
+            How the metrics and group stats have changed across the break time.
 
         '''
-        self.group_stats = self._group_stats()
-        self.vertical_metrics = self._vertical_metrics()
+        # First calculate the stats for can and ref in both groups
+        self.df_group_stats = self._calc_stats() # basic stats
+        # Then use the stats to compare them (between can and ref)
+        df_groupstats_compare = self._calc_stats_compare()
+        # Then calculate some validation metrics
+        df_validation_metrics = self._calc_validation_metrics()
 
-        self.horizontal_errors = self._horizontal_metrics(how=comparison_method)
+        # Merge the group and validation metrics in 1 big data frame
+        # ("vertical metrics")
+        self.df_group_metrics = pd.concat([df_groupstats_compare,
+                                           df_validation_metrics], axis=0)
 
-        return self.horizontal_errors
+        # compare changes in stats metrics and validation metrics "hor. errors")
+        self.df_metric_change = self._calc_metric_change(df_groupstats_compare,
+                                                         df_validation_metrics,
+                                                         how=comparison_method)
 
-
-    def _get_group_stats(self, can=True, ref=True):
-        if can and ref:
-            return self.group_stats
-        elif can:
-            return self.group_stats[self.group_stats.index.str.contains(self.candidate_name)]
-        elif ref:
-            return self.group_stats[self.group_stats.index.str.contains(self.reference_name)]
-        else:
-            return None
-
-
-
-    def _group_stats(self):
-        '''
-        Calculate the statistical values needed for the horizontal cci_validation.
-
-        Returns
-        -------
-        group_stats : pandas.DataFrame
-            Frame that contains the group stats
-        '''
-        group_stats = pd.DataFrame()
-        basic_measures = self.basic_measures[:,0]
-
-        for group_no, subset_data in enumerate([self.set0, self.set1, self.setfull]):
-            if group_no in [0,1]:
-                group = 'group%i' % group_no
-            else:
-                group = 'FRAME'
-            for name in [self.candidate_name, self.reference_name]:
-                # Basic measures
-                if 'min' in basic_measures:
-                    min = np.nan if subset_data[name].empty else np.min(subset_data[name].values)
-                    group_stats.at['min_%s' % name, '%s' % group] = min
-                if 'max' in basic_measures:
-                    max = np.nan if subset_data[name].empty else np.max(subset_data[name].values)
-                    group_stats.at['max_%s' % name, '%s' % group] = max
-                if 'var' in basic_measures:
-                    var = np.nan if subset_data[name].empty else np.var(subset_data[name].values)
-                    group_stats.at['var_%s' % name, '%s' % group] = var
-                if 'mean' in basic_measures:
-                    mean = np.nan if subset_data[name].empty else np.mean(subset_data[name].values)
-                    group_stats.at['mean_%s' % name, '%s' % group] = mean
-                if 'median' in basic_measures:
-                    median = np.nan if subset_data[name].empty else np.median(subset_data[name].values)
-                    group_stats.at['median_%s' % name, '%s' % group] = median
-                if 'iqr' in basic_measures:
-                    iqr = np.nan if subset_data[name].empty else stats.iqr(subset_data[name].values, nan_policy='omit')
-                    group_stats.at['iqr_%s' % name, '%s' % group] = iqr
-
-        return group_stats
-
-
-    def _vertical_metrics(self):
-        '''
-        Calculate metrics for the 2 groups and the full set. Using pytesmo and
-        stats for the groups
-
-        Returns
-        -------
-        vertical_metrics : pd.DataFrame
-            The combined basic and pytesmo metrics
-        '''
-
-        vmp = self._vertical_metrics_pytesmo()
-        vmg = self._vertical_metrics_from_groupstats()
-
-        return pd.concat([vmp, vmg], axis=0)
-
-
-    def _vertical_metrics_from_groupstats(self):
-        '''
-        Compare group stats (before after break) to detect impact of the break
-        on metrics.
-
-        Returns
-        -------
-        vertical_basic_metrics: pd.DataFrame
-            Metric comparison at break time for the 2 groups
-        '''
-        vertical_metrics = pd.DataFrame()
-
-        # from basic stats
-        for var, meth in self.basic_measures:
-            for group in ['group0', 'group1', 'FRAME']:
-                candidate_metric = self.group_stats.loc['%s_%s' % (var, self.candidate_name), group]
-                reference_metric = self.group_stats.loc['%s_%s' % (var, self.reference_name), group]
-
-                vmetric = compare(candidate_metric, reference_metric, meth)
-
-                vertical_metrics.at['%s_%s' % (var, meth), group] = vmetric
-
-        return vertical_metrics
-
-
-
-    def _vertical_metrics_pytesmo(self):
-        '''
-        Calculate vertical metrics between candidate and reference using pytesmo.
-
-        Returns
-        -------
-        vertical_metrics: pandas.DataFrame
-
-        '''
-        vertical_metrics = pd.DataFrame()
-
-        pytesmo_measures = self.pytesmo_measures
-
-        for group_no, subset_data in enumerate([self.set0, self.set1, self.setfull]):
-            if group_no in [0,1]:
-                group = 'group%i' % group_no
-            else:
-                group = 'FRAME'
-            if 'bias' in pytesmo_measures:
-                if any([subset_data[col].empty for col in [self.candidate_name, self.reference_name]]):
-                    bias = np.nan
-                else:
-                    bias =metrics.bias(subset_data[self.reference_name].values,
-                                       subset_data[self.candidate_name].values)
-                vertical_metrics.at['bias', '%s' % group] = bias
-
-            if 'mad' in pytesmo_measures:
-                if any([subset_data[col].empty for col in [self.candidate_name, self.reference_name]]):
-                    mad = np.nan
-                else:
-                    mad =metrics.mad(subset_data[self.reference_name].values,
-                                     subset_data[self.candidate_name].values)
-                vertical_metrics.at['mad', '%s' % group] = mad
-
-
-            if 'rmsd' in pytesmo_measures:
-                if any([subset_data[col].empty for col in [self.candidate_name, self.reference_name]]):
-                    rmsd = np.nan
-                else:
-                    rmsd =metrics.rmsd(subset_data[self.reference_name].values,
-                                       subset_data[self.candidate_name].values)
-                vertical_metrics.at['rmsd', '%s' % group] = rmsd
-
-            if 'nrmsd' in pytesmo_measures:
-                if any([subset_data[col].empty for col in [self.candidate_name, self.reference_name]]):
-                    nrmsd = np.nan
-                else:
-                    nrmsd =metrics.nrmsd(subset_data[self.reference_name].values,
-                                         subset_data[self.candidate_name].values)
-                vertical_metrics.at['nrmsd', '%s' % group] = nrmsd
-
-        return vertical_metrics
-
-    def _horizontal_metrics(self, how='Diff'):
-        '''
-        Compare metrics for the 2 groups via the passed comparison metric.
-
-        Parameters
-        ----------
-        how : str
-            Comparison metric for the metrics of the 2 groups.
-
-        Returns
-        -------
-        horizontal_metrics : pandas.DataFrame
-            The comparison metrics of the 2 groups
-        '''
-
-        horizontal_metrics = pd.Series()
-
-        for var, meth in self.basic_measures:
-            s0 = self.vertical_metrics.loc['%s_%s' % (var, meth), 'group0']
-            s1 = self.vertical_metrics.loc['%s_%s' % (var, meth), 'group1']
-            hmetric = compare(s0, s1, how)
-            horizontal_metrics.at['%s_%s_%s' % (how, var, meth)] = hmetric
-
-        for var in self.pytesmo_measures:
-            s0 = self.vertical_metrics.loc[var, 'group0']
-            s1 = self.vertical_metrics.loc[var, 'group1']
-            hmetric = compare(s0, s1, how)
-            horizontal_metrics.at['%s_%s' % (how, var)] = hmetric
-
-        return horizontal_metrics
+        return self.df_metric_change
 
 
 def usecase():
@@ -288,10 +326,10 @@ def usecase():
 
 
 if __name__ == '__main__':
-    can = pd.Series(index=pd.DatetimeIndex(start='2000-01-01', end='2000-12-31', freq='D'),
+    can = pd.Series(index=pd.date_range(start='2000-01-01', end='2000-12-31', freq='D'),
                          data = np.random.rand(366), name='thecan')
 
-    ref = pd.Series(index=pd.DatetimeIndex(start='2000-01-01', end='2000-12-31', freq='D'),
+    ref = pd.Series(index=pd.date_range(start='2000-01-01', end='2000-12-31', freq='D'),
                          data = np.random.rand(366), name='theref')
 
     ds = HorizontalVal(can, ref, datetime(2000,1,7))

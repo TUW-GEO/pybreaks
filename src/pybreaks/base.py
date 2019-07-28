@@ -6,7 +6,7 @@ from pytesmo.scaling import linreg_stored_params, linreg_params, \
 import pandas as pd
 from datetime import datetime
 import numpy as np
-from pybreaks.src.pybreaks.horizontal_errors import HorizontalVal
+from pybreaks.horizontal_errors import HorizontalVal
 import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.cbook as cbook
@@ -48,7 +48,7 @@ class TsRelBreakBase(object):
             fitting slope and intercept of the 2 series) and 'cdf_match'
             (for scaling the reference to the candidate based on fitting
             percentiles 0, 5, 10, 30, 50, 70, 90, 95 and 100 of the reference
-            to the candidate)
+            to the candidate with linear interpolation.)
         dropna : bool, optional (default: False)
             Keep only common values between the candidate and the reference series.
             As the implemented testing and adjustment methods build on difference
@@ -314,6 +314,9 @@ class TsRelBreakBase(object):
         self._check_group_no(group_no)
 
         df = frame.copy(True)
+
+        # TODO: BREAKTIME SHOULD BELONG TO THE SECOND GROUP
+            # the date when the break is introduced is already biased
 
         if group_no == 0:
             index = df.loc[:self.breaktime].index
@@ -713,7 +716,7 @@ class TsRelBreakBase(object):
 def usecase_base():
     # todo: implement as tests
     ''' Test all functions with an exaple GPI'''
-    from cci_breaks.cci_timeframes import CCITimes
+    from pybreaks.timeframes import TsTimeFrames
     from data_read_write.otherfunctions import smart_import
     from pprint import pprint
 
