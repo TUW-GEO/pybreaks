@@ -25,7 +25,7 @@ def read_test_data(gpi):
 
     return ts[start:end], breaktime
 
-def create_test_data(type):
+def create_artificial_test_data(type):
     ''' Create obvious test data of the selected type'''
 
     breaktime = datetime(2000,6,30) # break time belongs to first group!!

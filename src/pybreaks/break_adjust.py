@@ -677,6 +677,8 @@ class TsRelBreakAdjust(TsRelBreakBase):
         """
         if min_iter not in [None, 0, False]:
             warnings.warn('Forcing multiple adjustments may bias the output')
+        else:
+            min_iter = 0
 
         if self.adjust_tf_only and self.timeframe is None:
             raise ValueError(self.timeframe, 'No timeframe specfied')
@@ -690,7 +692,7 @@ class TsRelBreakAdjust(TsRelBreakBase):
                 pass
             else:
                 i = 0
-                while (self.isbreak and i < max_iter) or i < min_iter:
+                while (self.isbreak and i < max_iter) or (i < min_iter):
                     self.adjust_obj = self._adjust_obj(perform_bias_corr=False,
                                                        **self.adjmodel_kwargs)
                     if i == 0:
