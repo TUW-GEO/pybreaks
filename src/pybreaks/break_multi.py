@@ -486,7 +486,7 @@ class TsRelMultiBreak(TsRelBreakBase):
         styles = ['r-', 'b-', 'k--']
 
         for col, style in zip(plot_df.columns, styles):
-            d = plot_df[col].dropna()
+            d = plot_df[col].resample(resample).fillna(np.nan)
             if not d.empty:
                 d.plot(ax=ax, style=style)
 

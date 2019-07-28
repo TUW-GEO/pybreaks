@@ -1,23 +1,15 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Jun 03 20:54 2018
 
-@author: wolfgang
-"""
-
-from helper_funcions import create_test_data, read_test_data
-from breakadjustment.break_adjust import TsRelBreakAdjust
+from pybreaks.break_adjust import TsRelBreakAdjust
+from pybreaks.tests.helper_funcions import create_artificial_test_data, read_test_data
 import numpy.testing as nptest
-import math
-from datetime import datetime
 import numpy as np
 
+def test_artificial_break_adjust_no_resample_no_filter():
 
-def test_artificial_PR_adjust_no_resample_no_filter():
+    df, breaktime = create_artificial_test_data('mean')
 
-    df, breaktime = create_test_data('mean')
-
-    adjmodel_kwargs = dict([('regress_resample', None),
+    adjmodel_kwargs = dict([('regress_resample', ('M',0.3)),
                             ('model_intercept', True),
                             ('filter', None)])
     adjfct_kwargs = {}
@@ -110,4 +102,4 @@ def test_read_PR_adjust_output_check_fails():
 
     '''
 if __name__ == '__main__':
-    test_artificial_PR_adjust_no_resample_no_filter()
+    test_artificial_break_adjust_no_resample_no_filter()

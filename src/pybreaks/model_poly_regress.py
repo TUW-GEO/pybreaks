@@ -112,7 +112,7 @@ class HigherOrderRegression(TsRelBreakBase):
             xlim = ax.get_xlim()
             pos_x = (xlim[0] + xlim[1]) / 2.
             pos_y = 0 + (vmax * 0.04)
-            ax.annotate(textbox, fontsize=12, xy=(pos_x, pos_y),xycoords='data',
+            ax.annotate(textbox, fontsize=10, xy=(pos_x, pos_y),xycoords='data',
                         ha='center', va='bottom',
                         bbox={'facecolor': 'white', 'alpha': 0.6, 'pad': 3, 'edgecolor':model_style[2]})
 
