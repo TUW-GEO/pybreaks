@@ -1,19 +1,11 @@
 # -*- coding: utf-8 -*-
 
+import lmoments as lm
 import matplotlib.pyplot as plt
-from pybreaks.break_test import TsRelBreakBase
-
-import pandas as pd
 import numpy as np
-from datetime import datetime
-from breakadjustment.standalone_functions import df_conditional_temp_resample
-from model_poly_regress import HigherOrderRegression
 from scipy import stats
 from statsmodels.distributions.empirical_distribution import ECDF
-import lmoments as lm
 from functools import partial
-from scipy.interpolate import interp1d
-import statsmodels.api as sm
 
 
 class FitCDF2(object):
