@@ -107,7 +107,7 @@ class TestLinearRegress(unittest.TestCase):
     def test_plot(self):
         # compare the output plots?
         pass
-    
+
 if __name__ == '__main__':
     ## done
     unittest.main()

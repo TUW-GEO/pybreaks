@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-from datetime import datetime
 import pandas as pd
 import warnings
+from datetime import datetime
 
 class TsTimeFrames(object):
     '''
