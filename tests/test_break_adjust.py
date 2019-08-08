@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from pybreaks.break_adjust import TsRelBreakAdjust
-from tests.helper_funcions import create_artificial_test_data, read_test_data
+from tests.helper_functions import create_artificial_test_data, read_test_data
 import numpy.testing as nptest
 import numpy as np
 

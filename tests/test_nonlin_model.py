@@ -4,9 +4,10 @@
 from pybreaks.model_poly_regress import HigherOrderRegression
 import pandas as pd
 from pytesmo.scaling import linreg_stored_params, linreg_params
-from helper_funcions import read_test_data, create_artificial_test_data
+from helper_functions import read_test_data, create_artificial_test_data
 import unittest
 import numpy as np
+from datetime import datetime
 
 class TestLinearRegress(unittest.TestCase):
 
@@ -21,30 +22,31 @@ class TestLinearRegress(unittest.TestCase):
     @staticmethod
     def create_model(realdata=True, poly_order=2, filter_p=None):
         if realdata:
-            ts, breaktime = read_test_data(325278)
+            ts = read_test_data(325278)
+            start, end = datetime(1998, 1, 1), datetime(2007, 1, 1)
             ts.rename(columns={'CCI_41_COMBINED': 'can',
                                'merra2': 'ref'}, inplace=True)
             ts_drop = ts.dropna()
             slope, inter = linreg_params(ts_drop['can'], ts_drop['ref'])
             ts['can'] = linreg_stored_params(ts['can'], slope, inter)  # scale
         else:
-            ts, breaktime = create_artificial_test_data('asc2')
+            ts, breaktime, [start, end] = create_artificial_test_data('asc2')
 
-        regress = HigherOrderRegression(ts['can'].loc['1998-01-01':'2007-01-01'],
-                                        ts['ref'].loc['1998-01-01':'2007-01-01'],
+        regress = HigherOrderRegression(ts['can'].loc[start:end],
+                                        ts['ref'].loc[start:end],
                                         poly_order=poly_order, filter_p=filter_p)
         return regress
 
     def test_poly_model_no_filter(self):
         p=2
         regress_nf = self.create_model(True, poly_order=p, filter_p=None)
-        check = regress_nf.df_model['can'].dropna() == \
-                regress_nf.df_original['can'].dropna() # type: pd.DataFrame
+        check = regress_nf.df_model['can'].dropna().eq(
+                regress_nf.df_original['can'].dropna())
 
         assert(all(check) == True)
 
-        check = regress_nf.df_model['ref'].dropna() == \
-                regress_nf.df_original['ref'].dropna()    # type: pd.DataFrame
+        check = regress_nf.df_model['ref'].dropna().eq(
+                regress_nf.df_original['ref'].dropna())
         assert(all(check) == True)
 
         assert(regress_nf.df_model.loc['2000-01-01','Q'] ==
@@ -54,15 +56,15 @@ class TestLinearRegress(unittest.TestCase):
 
         params_nf = regress_nf.get_model_params()
 
-        np.testing.assert_almost_equal(params_nf['coef_0'], -0.3527954244)
-        np.testing.assert_almost_equal(params_nf['coef_1'], 0.0144664346)
+        np.testing.assert_almost_equal(params_nf['coef_0'], -0.3407021042)
+        np.testing.assert_almost_equal(params_nf['coef_1'],  0.0139705460)
         assert np.isnan(params_nf['filter_p'])
-        np.testing.assert_almost_equal(params_nf['inter'], 27.789087831)
-        np.testing.assert_almost_equal(params_nf['mse'],   29.6543326890)
+        np.testing.assert_almost_equal(params_nf['inter'], 30.700283984)
+        np.testing.assert_almost_equal(params_nf['mse'],   27.6561612998)
         assert params_nf['n_input'] == regress_nf.df_model.index.size
         assert params_nf['poly_order'] == p
         np.testing.assert_almost_equal(params_nf['r2'],  0.572561591)
-        np.testing.assert_almost_equal(params_nf['sse'], 63845.77827961)
+        np.testing.assert_almost_equal(params_nf['sse'], 59543.71527864)
 
         ax = regress_nf.plot()
 
@@ -72,20 +74,19 @@ class TestLinearRegress(unittest.TestCase):
         p = 2
         filter_p = 5.
         regress_f = self.create_model(True, poly_order=p, filter_p=filter_p)
-        assert regress_f.df_model.index.size  == \
-               int(regress_f.df_original.index.size * 0.95) # always int below
+        assert regress_f.df_model.index.size  == 2044
 
         params_f = regress_f.get_model_params()
 
-        np.testing.assert_almost_equal(params_f['coef_0'], -0.335476773)
-        np.testing.assert_almost_equal(params_f['coef_1'], 0.01494514146)
+        np.testing.assert_almost_equal(params_f['coef_0'], -0.2741787363)
+        np.testing.assert_almost_equal(params_f['coef_1'], 0.013642449537)
         assert params_f['filter_p'] == filter_p
-        np.testing.assert_almost_equal(params_f['inter'], 26.4532526)
-        np.testing.assert_almost_equal(params_f['mse'],  23.74676171)
+        np.testing.assert_almost_equal(params_f['inter'], 28.4998018692)
+        np.testing.assert_almost_equal(params_f['mse'],  23.61528847616)
         assert params_f['n_input'] == regress_f.df_model.index.size
         assert params_f['poly_order'] == p
-        np.testing.assert_almost_equal(params_f['r2'],  0.644286185)
-        np.testing.assert_almost_equal(params_f['sse'], 48562.12769864)
+        np.testing.assert_almost_equal(params_f['r2'],  0.62507165674)
+        np.testing.assert_almost_equal(params_f['sse'], 48269.6496452)
 
         ax = regress_f.plot()
 
@@ -98,9 +99,9 @@ class TestLinearRegress(unittest.TestCase):
         assert autocorr[0] == 1.
         assert autocorr.index.size == len(lags)
 
-        np.testing.assert_almost_equal(regress_stats.me(True), -0.2740602764414284)
-        np.testing.assert_almost_equal(regress_stats.mse(True), 11.93291109588423)
-        np.testing.assert_almost_equal(regress_stats.rmse(), 5.44557918766132)
+        np.testing.assert_almost_equal(regress_stats.me(True), -0.2646658840)
+        np.testing.assert_almost_equal(regress_stats.mse(True), 11.12884641529)
+        np.testing.assert_almost_equal(regress_stats.rmse(), 5.2589125586)
         np.testing.assert_almost_equal(regress_stats.r2(), 0.57256159130)
 
 

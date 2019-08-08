@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 import numpy.testing as nptest
-from tests.helper_funcions import read_test_data, create_artificial_test_data
+from tests.helper_functions import read_test_data, create_artificial_test_data
 import unittest
 
 

@@ -25,10 +25,6 @@ def read_test_data(gpi, scale_factor=1.):
     -------
 
     """
-    start = datetime(1998,1,1)
-    end = datetime(2007,1,1)
-    breaktime = datetime(2002, 6, 19)
-
     #for file in os.listdir(path)
     file = 'data_{}.csv'.format(gpi)
     testdata_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
@@ -36,12 +32,13 @@ def read_test_data(gpi, scale_factor=1.):
     ts = pd.read_csv(testdata_path, index_col=0, parse_dates=True) * scale_factor
 
 
-    return ts[start:end], breaktime
+    return ts
 
 def create_artificial_test_data(type):
     ''' Create obvious test data of the selected type'''
 
     breaktime = datetime(2000,6,30) # break time belongs to second group!!
+    timeframe = np.array([datetime(2000,1,1), datetime(2000,12,31)])
     if type == 'var':
         # data with a var break
         df = pd.DataFrame(index= pd.date_range(start='2000-01-01',
@@ -79,4 +76,4 @@ def create_artificial_test_data(type):
     else:
         df = None
 
-    return df,  breaktime
+    return df,  breaktime, timeframe

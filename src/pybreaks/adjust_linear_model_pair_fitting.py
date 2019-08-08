@@ -743,24 +743,21 @@ class PairRegressMatchAdjust(object):
 
 
 def usecase():
-    from cci_breaks.cci_timeframes import CCITimes
-    from data_read_write.otherfunctions import smart_import
-    from break_test import TsRelBreakTest
-
+    from tests.helper_functions import read_test_data
     gpi = 654079  # bad: 395790,402962
     canname = 'CCI_45_COMBINED'
     refname = 'MERRA2'
 
-    times = CCITimes(canname, min_set_days=None, skip_breaktimes=[1, 3]). \
-        get_times(gpi=gpi)
-
+    ts_full, breaktime = read_test_data(gpi)
     ts_full, plotpath = smart_import(gpi, canname, refname)
     ts_full = ts_full[[canname, refname]]
     ts_full['original'] = ts_full[canname].copy(True)
 
     adjust_group = 0
-    breaktime = times['breaktimes'][0]
-    timeframe = times['timeframes'][0]
+
+    breaktime = datetime(2012,7,1)
+    timeframe = np.array([datetime(2010,7,1), datetime(2018,6,30)])
+
 
     ts_frame = ts_full[datetime(2002, 6, 19):timeframe[1]].copy(True)
 
@@ -776,7 +773,7 @@ def usecase():
         ts_frame[refname],
         breaktime,
         candidate_freq='D',
-        regress_resample=None, #('M', 0.3),
+        regress_resample=None,  # ('M', 0.3),
         bias_corr_method='linreg',
         filter=('both', 5),
         adjust_group=adjust_group,
@@ -806,6 +803,7 @@ def usecase():
     isbreak, breaktype, testresult, errorcode = testds.run_tests()
 
     print(isbreak, breaktype)
+
 
 if __name__ == '__main__':
     usecase()

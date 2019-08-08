@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from helper_funcions import create_test_data, read_test_data
+from helper_functions import create_test_data, read_test_data
 from breakadjustment.adjust_linear_model_pair_fitting import RegressPairFit
 import numpy.testing as nptest
 import math

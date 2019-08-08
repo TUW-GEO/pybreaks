@@ -5,9 +5,10 @@ from pybreaks.model_lin_regress import LinearRegression
 import pandas as pd
 import numpy as np
 from pytesmo.scaling import linreg_stored_params, linreg_params
-from helper_funcions import read_test_data, create_artificial_test_data
+from helper_functions import read_test_data, create_artificial_test_data
 import numpy.testing as nptest
 import unittest
+from datetime import datetime
 
 class TestLinearRegress(unittest.TestCase):
 
@@ -23,17 +24,20 @@ class TestLinearRegress(unittest.TestCase):
     def create_model(realdata=True, force_implementation=None, filter_p=None):
         if realdata:
             ts, breaktime = read_test_data(325278)
+            start, end = datetime(1998, 1, 1), datetime(2007, 1, 1)
+            breaktime = datetime(2002, 6, 19)
+            ts = ts[start:end]
             ts.rename(columns={'CCI_41_COMBINED': 'candidate',
                                'merra2': 'reference'}, inplace=True)
         else:
-            ts, breaktime = create_artificial_test_data('asc2')
+            ts, breaktime, [start, end] = create_artificial_test_data('asc2')
 
         if realdata: # bias correction
             slope, inter = linreg_params(ts.dropna().candidate, ts.dropna().reference)
             ts.candidate = linreg_stored_params(ts.candidate, slope, inter)  # scale
 
-        regress = LinearRegression(ts['candidate'].loc['1998-01-01':'2007-01-01'],
-                                   ts['reference'].loc['1998-01-01':'2007-01-01'],
+        regress = LinearRegression(ts['candidate'].loc[start:end],
+                                   ts['reference'].loc[start:end],
                                    filter_p=filter_p, fit_intercept=True,
                                    force_implementation=force_implementation)
         return regress
@@ -41,13 +45,13 @@ class TestLinearRegress(unittest.TestCase):
     def test_lin_model_no_filter(self):
         # When no resampling is done the df is just a simple copy
         regress = self.create_model(True, None)
-        check = regress.df_model.candidate.dropna() == \
-                regress.df_original.candidate.dropna() # type: pd.DataFrame
+        check = regress.df_model.candidate.dropna().eq(
+                regress.df_original.candidate.dropna())
 
         assert(all(check) == True)
 
-        check = regress.df_model.reference.dropna() == \
-                regress.df_original.reference.dropna()    # type: pd.DataFrame
+        check = regress.df_model.reference.dropna().eq(
+                regress.df_original.reference.dropna())
         assert(all(check) == True)
 
         assert(regress.df_model.loc['2000-01-01','Q'] ==
