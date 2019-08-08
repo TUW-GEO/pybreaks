@@ -3,8 +3,8 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from pybreaks.src.pybreaks.utils import filter_by_quantiles, autocorr
-from pybreaks.src.pybreaks.base import TsRelBreakBase
+from pybreaks.utils import filter_by_quantiles, autocorr
+from pybreaks.base import TsRelBreakBase
 import pandas as pd
 import matplotlib.lines as mlines
 from sklearn.preprocessing import PolynomialFeatures
@@ -41,7 +41,7 @@ class HigherOrderRegression(TsRelBreakBase):
 
 
         self.filter_p = filter_p
-        self.poly_order = poly_order
+        self.poly_order = int(poly_order)
 
         TsRelBreakBase.__init__(self, self.candidate, self.reference, breaktime=None,
                                 bias_corr_method=None, dropna=True)
@@ -218,7 +218,7 @@ class HigherOrderRegression(TsRelBreakBase):
         self.inter = model.intercept_
         self.coef = model.coef_[1:]
 
-        self.r2 = model.score(X_train_poly, y)
+        self.valr2 = model.score(X_train_poly, y)
 
         canname = self.candidate_col_name
         self.df_model['candidate_modeled'] = model.predict(X_train_poly)
@@ -262,7 +262,7 @@ class HigherOrderRegression(TsRelBreakBase):
         predicts the expected value of y, disregarding the input features,
         would get a R^2 score of 0.0."""
 
-        return self.r2
+        return self.valr2
 
     def rmse(self):
         """
@@ -275,7 +275,7 @@ class HigherOrderRegression(TsRelBreakBase):
             Root mean squared errors
         """
         residuals2 = self.df_model['errors'].copy(True) ** 2
-        return np.sqrt(np.mean(residuals2.dropna().values()))
+        return np.sqrt(np.nanmean(residuals2.values))
 
     def sse(self):
         """
@@ -292,7 +292,7 @@ class HigherOrderRegression(TsRelBreakBase):
 
     def me(self, median=False):
         """
-        Cacluate the median/mean of errors of the current model
+        Calculate the median/mean of errors of the current model
 
         Parameters
         -------
@@ -307,9 +307,9 @@ class HigherOrderRegression(TsRelBreakBase):
         """
         residuals = self.df_model['errors'].copy(True)
         if median:
-            return np.nanmedian((residuals).values)
+            return np.nanmedian(residuals.values)
         else:
-            return np.nanmean((residuals).values)
+            return np.nanmean(residuals.values)
 
 
     def mse(self, median=False):
@@ -352,7 +352,7 @@ class HigherOrderRegression(TsRelBreakBase):
         model_params['inter'] = self.inter
 
 
-        model_params['r2'] = self.r2
+        model_params['r2'] = self.valr2
         model_params['n_input'] = self.n
         model_params['sse'] = self.sse()
         model_params['mse'] = self.mse()

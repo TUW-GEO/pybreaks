@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from pybreaks.break_adjust import TsRelBreakAdjust
-from pybreaks.tests.helper_funcions import create_artificial_test_data, read_test_data
+from tests.helper_funcions import create_artificial_test_data, read_test_data
 import numpy.testing as nptest
 import numpy as np
 
@@ -36,7 +36,8 @@ def test_artificial_break_adjust_no_resample_no_filter():
 
     data_adjusted, stillbreak, adjerror = \
         obj.test_and_adjust(min_iter=0, max_iter=1, correct_below_0=True,
-                            interpolation_method=None, adjust_tf_only=True)
+                            corrections_from_core=True, resample_corrections=True,
+                            interpolation_method='linear')
 
 
     nptest.assert_almost_equal(data_adjusted['candidate_adjusted'].values,

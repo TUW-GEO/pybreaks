@@ -434,12 +434,12 @@ class TsRelBreakBase(object):
             group_stats.append(val._get_group_stats(can=True,
                                                     ref=True if i == 0 else False))
             # vertical metrics and rename
-            vert = val.vertical_metrics
-            vert.index = (prefix_str + val.vertical_metrics.index.astype(str))
+            vert = val.df_group_metrics
+            vert.index = (prefix_str + val.df_group_metrics.index.astype(str))
             vertical_metrics.append(vert)
             # horizontal errors and renmae
-            hor_err = val.horizontal_errors
-            hor_err.index = (prefix_str + val.horizontal_errors.index.astype(str))
+            hor_err = val.df_metric_change
+            hor_err.index = (prefix_str + val.df_metric_change.index.astype(str))
             horizontal_errors.append(hor_err)
 
         group_stats = pd.concat(group_stats, axis=0)  # type: pd.DataFrame

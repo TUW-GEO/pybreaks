@@ -4,10 +4,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import stats
 import sklearn.linear_model as sklearnmodel
-from pybreaks.src.pybreaks.utils import filter_by_quantiles
-from pybreaks.src.pybreaks.base import TsRelBreakBase
+from pybreaks.utils import filter_by_quantiles
+from pybreaks.base import TsRelBreakBase
 import pandas as pd
-from pybreaks.src.pybreaks.utils import autocorr
+from pybreaks.utils import autocorr
 import matplotlib.lines as mlines
 
 '''

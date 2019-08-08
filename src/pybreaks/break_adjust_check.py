@@ -6,8 +6,8 @@ import numpy as np
 import calendar
 from datetime import datetime
 
-from pybreaks.src.pybreaks.base import TsRelBreakBase
-from pybreaks.src.pybreaks.temp_coverage import compare_temp_cov
+from pybreaks.base import TsRelBreakBase
+from pybreaks.temp_coverage import compare_temp_cov
 
 class BreakAdjustInputCheck(TsRelBreakBase):
     """

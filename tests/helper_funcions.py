@@ -29,10 +29,11 @@ def read_test_data(gpi, scale_factor=1.):
     end = datetime(2007,1,1)
     breaktime = datetime(2002, 6, 19)
 
-    path = os.path.join('test-data', 'csv_ts')
     #for file in os.listdir(path)
-    file = 'SMECVGPI%i.csv' % gpi
-    ts = pd.read_csv(os.path.join(path, file), index_col=0, parse_dates=True) * scale_factor
+    file = 'data_{}.csv'.format(gpi)
+    testdata_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                 'test-data', 'csv_ts', file)
+    ts = pd.read_csv(testdata_path, index_col=0, parse_dates=True) * scale_factor
 
 
     return ts[start:end], breaktime
@@ -69,6 +70,12 @@ def create_artificial_test_data(type):
                                               end='2000-12-31', freq='D'),
                           data={'candidate': range(366),
                                 'reference': [366] * 366})
+    elif type == 'asc2': # both ascending
+        df = pd.DataFrame(index=pd.date_range(start='2000-01-01',
+                                              end='2000-12-31', freq='D'),
+                          data={'candidate': range(366),
+                                'reference': range(10, 366+10)})
+
     else:
         df = None
 

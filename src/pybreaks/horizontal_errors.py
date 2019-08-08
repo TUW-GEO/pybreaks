@@ -285,13 +285,13 @@ class HorizontalVal(object):
         return df_validation_metrics
 
 
-    def run(self, comparison_method='Diff'):
+    def run(self, comparison_method='AbsDiff'):
         '''
         Calculate the measures and compare them over the break time
 
         Parameters
         ----------
-        comparison_method : str, optional (default: Diff)
+        comparison_method : str, optional (default: AbsDiff)
             How the metrics across the groups are compared. Default
             is the difference between group 1 and group 2.
 
@@ -322,16 +322,17 @@ class HorizontalVal(object):
 
 
 def usecase():
-    pass
+    can = pd.Series(index=pd.date_range(start='2000-01-01', end='2000-12-31', freq='D'),
+                    data=np.random.rand(366), name='thecan')
+
+    ref = pd.Series(index=pd.date_range(start='2000-01-01', end='2000-12-31', freq='D'),
+                    data=np.random.rand(366), name='theref')
+
+    ds = HorizontalVal(can, ref, datetime(2000, 1, 7))
+
+    errors = ds.run('Diff')
 
 
 if __name__ == '__main__':
-    can = pd.Series(index=pd.date_range(start='2000-01-01', end='2000-12-31', freq='D'),
-                         data = np.random.rand(366), name='thecan')
+    usecase()
 
-    ref = pd.Series(index=pd.date_range(start='2000-01-01', end='2000-12-31', freq='D'),
-                         data = np.random.rand(366), name='theref')
-
-    ds = HorizontalVal(can, ref, datetime(2000,1,7))
-
-    errors =  ds.run('Diff')

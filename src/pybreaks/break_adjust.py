@@ -5,15 +5,15 @@ import matplotlib.pyplot as plt
 from collections import OrderedDict
 import math
 from datetime import datetime
-from pybreaks.src.pybreaks.base import TsRelBreakBase
-from pybreaks.src.pybreaks.break_test import TsRelBreakTest
-from pybreaks.src.pybreaks.adjust_linear_model_pair_fitting import RegressPairFit
-from pybreaks.src.pybreaks.adjust_freq_quantile_matching import QuantileCatMatch, N_Quantile_Exception
-from pybreaks.src.pybreaks.adjust_higher_order_moments import HigherOrderMoments
-from pybreaks.src.pybreaks.temp_coverage import drop_months_data
-from pybreaks.src.pybreaks.utils import merge_dicts
+from pybreaks.base import TsRelBreakBase
+from pybreaks.break_test import TsRelBreakTest
+from pybreaks.adjust_linear_model_pair_fitting import RegressPairFit
+from pybreaks.adjust_freq_quantile_matching import QuantileCatMatch, N_Quantile_Exception
+from pybreaks.adjust_higher_order_moments import HigherOrderMoments
+from pybreaks.temp_coverage import drop_months_data
+from pybreaks.utils import merge_dicts
 import warnings
-from pybreaks.src.pybreaks.break_adjust_check import BreakAdjustInputCheck
+from pybreaks.break_adjust_check import BreakAdjustInputCheck
 import copy
 import numpy as np
 import os
@@ -671,7 +671,7 @@ class TsRelBreakAdjust(TsRelBreakBase):
             If this is set to true, values below 0 after adjustment will be set
             to the minimum value of the current time frame instead - so that there
             are never values below 0.
-        adjfct_kwargs : dict
+        adjfct_kwargs :
             kwargs that are specific to the adjustment method and are passed
             to the adjust() function of the object
         """
