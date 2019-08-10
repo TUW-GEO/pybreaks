@@ -60,6 +60,14 @@ class RegressPairFit(TsRelBreakBase):
              Time period and minimum data coverage in this period for resampling
              candidate and reference before generating regression models from
              the resampled data. eg ('M', 0.3)
+        bias_corr_method : str or None, optional (default: 'linreg')
+            Name of the method that is used to correct the bias between
+            candidate and reference. Currently supported methods are
+            'linreg' (for scaling the reference to the candidate based on
+            fitting slope and intercept of the 2 series) and 'cdf_match'
+            (for scaling the reference to the candidate based on fitting
+            percentiles 0, 5, 10, 30, 50, 70, 90, 95 and 100 of the reference
+            to the candidate with linear interpolation.)
         filter : tuple or None, optional (default: ('both', 5))
             (parts to filter , percentile)
                 parts to filter : which part of the input data (wrt to the break time)
@@ -564,7 +572,7 @@ class PairRegressMatchAdjust(object):
     def _interpol_samples(self, samples, interpolation_method):
         start = datetime(samples.index[0].year, samples.index[0].month, 1)
         end = datetime(samples.index[-1].year, samples.index[-1].month,
-                       days_in_month(samples.index[-1].month, samples.index[-1].year))
+                       int(days_in_month(samples.index[-1].month, samples.index[-1].year)))
         interpolated = self._interpolate(start=start, end=end,
                                          samples=samples,
                                          interpolation_method=interpolation_method)
@@ -617,10 +625,10 @@ class PairRegressMatchAdjust(object):
             first_m, last_m = m_samples.index[0], m_samples.index[-1]
             # the year 1904 is just a placeholder here (it is a leap year)
             index = pd.date_range(
-                start='1904-{m}-01'.format(m=str(first_m).zfill(2)),
-                end='1904-{m}-{d}'.format(
-                    m=str(last_m).zfill(2),
-                    d=str(days_in_month(last_m, 1904)).zfill(2)),freq='D')
+                start = datetime(1904, first_m, 1),
+                end = datetime(1904, last_m, days_in_month(last_m, 1904, int)),
+                freq='D')
+
             samples = pd.Series(index=index)
             for m in m_samples.index:
                 str_m = str(m).zfill(2) if len(str(m)) == 1 else str(m)
@@ -632,7 +640,11 @@ class PairRegressMatchAdjust(object):
                 samples.loc[samples.index[0]] = m_samples.loc[m_samples.index[0]]  # last day same as first day
         else:
             # Do not resample, but find a DOY series (mean of each unique DOY)
-            samples = adjustments.groupby(adjustments.index.dayofyear).mean()
+            samples = adjustments.groupby([adjustments.index.month, adjustments.index.day]).mean()
+            index = pd.DataFrame({'month': samples.index.get_level_values(0),
+                                  'day': samples.index.get_level_values(1),
+                                  'year': 1904})
+            samples.index = pd.to_datetime(index).values
 
         if resample_corrections:
             try:  # try the midmonth target values (only possible for 12 months)
@@ -665,7 +677,7 @@ class PairRegressMatchAdjust(object):
                     i += 1
 
                 if s.index.month[-1] == 12:
-                    dom = days_in_month(12, 1904)
+                    dom = days_in_month(12, 1904, int)
                     nd = datetime(1904, 12, dom)
                     s[nd] = np.nan
                     s = s.sort_index()
@@ -679,10 +691,6 @@ class PairRegressMatchAdjust(object):
                                     freq='D')
                 s = s.reindex(idx, fill_value=np.nan)
                 samples = s.sort_index()
-
-            else:
-                samples = s.sort_index()
-
         # if there are nans in the DOY or MOY series, interpolate them
         # always linear here, this is just a gap filling and there should
         # not be many values missing
@@ -704,7 +712,7 @@ class PairRegressMatchAdjust(object):
                 index = pd.DataFrame({'year': year, 'month': adj.index.month, 'day': adj.index.day})
             except AttributeError:
                 index = pd.DataFrame({'year': year, 'month': adj.index.values,
-                                      'day': days_in_month(adj.index.values, year)})
+                                      'day': days_in_month(adj.index.values, year, float)})
 
             i = pd.to_datetime(index).values
 
@@ -744,12 +752,11 @@ class PairRegressMatchAdjust(object):
 
 def usecase():
     from tests.helper_functions import read_test_data
+    from pybreaks.break_test import TsRelBreakTest
     gpi = 654079  # bad: 395790,402962
-    canname = 'CCI_45_COMBINED'
-    refname = 'MERRA2'
 
     ts_full, breaktime = read_test_data(gpi)
-    ts_full, plotpath = smart_import(gpi, canname, refname)
+    canname, refname = 'CCI', 'REF'
     ts_full = ts_full[[canname, refname]]
     ts_full['original'] = ts_full[canname].copy(True)
 

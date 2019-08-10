@@ -23,7 +23,7 @@ class TestLinearRegress(unittest.TestCase):
     @staticmethod
     def create_model(realdata=True, force_implementation=None, filter_p=None):
         if realdata:
-            ts, breaktime = read_test_data(325278)
+            ts = read_test_data(325278)
             start, end = datetime(1998, 1, 1), datetime(2007, 1, 1)
             breaktime = datetime(2002, 6, 19)
             ts = ts[start:end]

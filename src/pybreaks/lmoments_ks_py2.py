@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 
-import lmoments as lm
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats
 from statsmodels.distributions.empirical_distribution import ECDF
 from functools import partial
-
+import lmoments as lm
 
 class FitCDF2(object):
     '''

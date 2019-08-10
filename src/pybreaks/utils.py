@@ -264,7 +264,7 @@ def flatten_dict(d):
 
 
 
-def days_in_month(month, year):
+def days_in_month(month, year, astype=int):
     '''
     Find the
     Parameters
@@ -273,11 +273,12 @@ def days_in_month(month, year):
         month(s) to look up
     year : int or iterable
         year(s) of the passed month(s)
-
+    astype : dtype
+        int or float
     Returns
     -------
-    days : np.array
-        Days in the passed motbs
+    days : np.array of float
+        Days in the passed months
     '''
     if isinstance(month, collections.Iterable):
         if isinstance(year, int):
@@ -285,10 +286,10 @@ def days_in_month(month, year):
 
         days = []
         for m, y in zip(month, year):
-            days.append(calendar.monthrange(y, m)[1])
+            days.append(astype(calendar.monthrange(y, m)[1]))
         return np.array(days)
     else:
-        return calendar.monthrange(year, month)[1]
+        return astype(calendar.monthrange(year, month)[1])
 
 
 def mid_month_target_values(M):
@@ -312,18 +313,18 @@ def mid_month_target_values(M):
     '''
 
 
-    A = np.matrix([[7./8., 1./8., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
-                  [1./8., 6./8., 1./8., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
-                  [0., 1./8., 6./8., 1./8., 0., 0., 0., 0., 0., 0., 0., 0.],
-                  [0., 0., 1./8., 6./8., 1./8., 0., 0., 0., 0., 0., 0., 0.],
-                  [0., 0., 0., 1./8., 6./8., 1./8., 0., 0., 0., 0., 0., 0.],
-                  [0., 0., 0., 0., 1./8., 6./8., 1./8., 0., 0., 0., 0., 0.],
-                  [0., 0., 0., 0., 0., 1./8., 6./8., 1./8., 0., 0., 0., 0.],
-                  [0., 0., 0., 0., 0., 0., 1./8., 6./8., 1./8., 0., 0., 0.],
-                  [0., 0., 0., 0., 0., 0., 0., 1./8., 6./8., 1./8., 0., 0.],
-                  [0., 0., 0., 0., 0., 0., 0., 0., 1./8., 6./8., 1./8., 0.],
-                  [0., 0., 0., 0., 0., 0., 0., 0., 0., 1./8., 6./8., 1./8.],
-                  [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1./8., 7./8.]])
+    A = np.array([[7./8., 1./8., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
+                   [1./8., 6./8., 1./8., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
+                   [0., 1./8., 6./8., 1./8., 0., 0., 0., 0., 0., 0., 0., 0.],
+                   [0., 0., 1./8., 6./8., 1./8., 0., 0., 0., 0., 0., 0., 0.],
+                   [0., 0., 0., 1./8., 6./8., 1./8., 0., 0., 0., 0., 0., 0.],
+                   [0., 0., 0., 0., 1./8., 6./8., 1./8., 0., 0., 0., 0., 0.],
+                   [0., 0., 0., 0., 0., 1./8., 6./8., 1./8., 0., 0., 0., 0.],
+                   [0., 0., 0., 0., 0., 0., 1./8., 6./8., 1./8., 0., 0., 0.],
+                   [0., 0., 0., 0., 0., 0., 0., 1./8., 6./8., 1./8., 0., 0.],
+                   [0., 0., 0., 0., 0., 0., 0., 0., 1./8., 6./8., 1./8., 0.],
+                   [0., 0., 0., 0., 0., 0., 0., 0., 0., 1./8., 6./8., 1./8.],
+                   [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1./8., 7./8.]])
 
     T = np.matmul(np.linalg.inv(A), M)
 
@@ -357,7 +358,7 @@ def dt_freq(dt, ignore_M=False):
     last_month, last_year =  months[-1], years[-1]
 
 
-    dm = days_in_month(months, years) # days in month
+    dm = days_in_month(months, years, astype=float) # days in month
     sm = np.array([int(timedelta(days=d).total_seconds()) for d in dm]) # seconds in month
 
     seconds = []
@@ -386,7 +387,7 @@ def dt_freq(dt, ignore_M=False):
             df_month.loc['{}-{:02d}'.format(y,m),'passed'] = i
         df_month['passed'] = df_month['passed'].bfill()
         for y, m in zip(df_month.index.year, df_month.index.month):
-            df_month.loc['{}-{:02d}'.format(y,m),'days'] = days_in_month(m, y)
+            df_month.loc['{}-{:02d}'.format(y,m),'days'] = days_in_month(m, y, float)
 
         df_month = df_month[1:]
         m_should_days = df_month.groupby(['passed']).sum()['days'].values

@@ -397,11 +397,11 @@ class TsRelBreakBase(object):
 
         Returns
         -------
-         group_stats : pandas.DataFrame or dict
+         df_group_stats : pd.DataFrame or dict
             Statistics for the columns for the 2 groups
-         vertical_metrics : pandas.DataFrame or dict
+         df_group_metrics : pd.DataFrame or dict
             Error metrics between the candidate and reference for the 2 groups
-         horizontal_errors : pandas.Series or dict
+         df_metric_change : pd.Series or dict
             Comparison across break time between error metrics of the 2 groups
         """
 
@@ -420,7 +420,7 @@ class TsRelBreakBase(object):
 
         other_names = [c for c in stats_data.columns if c != ref_name]
 
-        group_stats, vertical_metrics, horizontal_errors = [], [], []
+        df_group_stats, df_group_metrics, df_metric_change = [], [], []
 
         for i, other_name in enumerate(other_names):
             can = stats_data[other_name]
@@ -431,46 +431,44 @@ class TsRelBreakBase(object):
             val = HorizontalVal(can, ref, self.breaktime)
             val.run(comparison_method=comp_meth)
             # group stats
-            group_stats.append(val._get_group_stats(can=True,
-                                                    ref=True if i == 0 else False))
+            df_group_stats.append(val._get_group_stats(
+                can=True, ref=True if i == 0 else False))
             # vertical metrics and rename
-            vert = val.df_group_metrics
-            vert.index = (prefix_str + val.df_group_metrics.index.astype(str))
-            vertical_metrics.append(vert)
-            # horizontal errors and renmae
-            hor_err = val.df_metric_change
-            hor_err.index = (prefix_str + val.df_metric_change.index.astype(str))
-            horizontal_errors.append(hor_err)
+            metrics = val.df_group_metrics
+            metrics.index = (prefix_str + val.df_group_metrics.index.astype(str))
+            df_group_metrics.append(metrics)
+            # horizontal errors and rename
+            delta_metrics = val.df_metric_change
+            delta_metrics.index = (prefix_str + val.df_metric_change.index.astype(str))
+            df_metric_change.append(delta_metrics)
 
-        group_stats = pd.concat(group_stats, axis=0)  # type: pd.DataFrame
-        vertical_metrics = pd.concat(vertical_metrics, axis=0)  # type: pd.DataFrame
-        horizontal_errors = pd.concat(horizontal_errors, axis=0)  # type: pd.Series
+        df_group_stats = pd.concat(df_group_stats, axis=0)
+        df_group_metrics = pd.concat(df_group_metrics, axis=0)
+        df_metric_change = pd.concat(df_metric_change, axis=0)
 
         if digits:
-            group_stats = group_stats.round(digits)
-            vertical_metrics = vertical_metrics.round(digits)
-            horizontal_errors = horizontal_errors.round(digits)
+            df_group_stats = df_group_stats.round(digits)
+            df_group_metrics = df_group_metrics.round(digits)
+            df_metric_change = df_metric_change.round(digits)
 
         if as_dict:  # Merge the index and col name to a single variable name
-            group_stats_dict = {}
-            vertical_metrics_dict = {}
-            horizontal_errors_dict = horizontal_errors.to_dict()
+            df_group_stats_dict = {}
+            df_group_metrics_dict = {}
+            df_metric_change_dict = df_metric_change.to_dict()
 
-            for col in group_stats.columns:
-                for index in group_stats.index:
-                    val = group_stats.loc[index, col]
-                    if not np.isnan(val):
-                        group_stats_dict['%s_%s' % (index, col)] = val
+            for col in df_group_stats.columns:
+                for index in df_group_stats.index:
+                    val = df_group_stats.loc[index, col]
+                    df_group_stats_dict['%s_%s' % (index, col)] = val
 
-            for col in vertical_metrics.columns:
-                for index in vertical_metrics.index:
-                    val = vertical_metrics.loc[index, col]
-                    if not np.isnan(val):
-                        vertical_metrics_dict['%s_%s' % (index, col)] = val
+            for col in df_group_metrics.columns:
+                for index in df_group_metrics.index:
+                    val = df_group_metrics.loc[index, col]
+                    df_group_metrics_dict['%s_%s' % (index, col)] = val
 
-            return group_stats_dict, vertical_metrics_dict, horizontal_errors_dict
+            return df_group_stats_dict, df_group_metrics_dict, df_metric_change_dict
         else:
-            return group_stats, vertical_metrics, horizontal_errors
+            return df_group_stats, df_group_metrics, df_metric_change
 
     def plot_ts(self, frame, title=None, only_success=False, ax=None,
                 save_path=None):

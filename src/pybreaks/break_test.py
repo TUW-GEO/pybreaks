@@ -9,6 +9,7 @@ from pybreaks.base import TsRelBreakBase
 from collections import OrderedDict
 from pybreaks.utils import df_conditional_temp_resample
 import copy
+import warnings
 
 '''
 Class that contains statistical methods for homogeneity testing.
@@ -187,8 +188,9 @@ class TsRelBreakTest(TsRelBreakBase):
         """
         df = self.get_group_data(group_no, self.df_test_resampled, [self.candidate_col_name,
                                                                     self.reference_col_name])
-
-        corr, pval = stats.spearmanr(df[self.candidate_col_name], df[self.reference_col_name])
+        with warnings.catch_warnings(): # supress scipy warnings
+            warnings.filterwarnings('ignore')
+            corr, pval = stats.spearmanr(df[self.candidate_col_name], df[self.reference_col_name])
 
         if not (corr > min_corr and pval < max_p):
             msg = 'Spearman correlation failed with correlation %f and pval %f ' % (corr, pval)
@@ -318,7 +320,9 @@ class TsRelBreakTest(TsRelBreakBase):
         q0 = self.get_group_data(0, self.df_test_resampled, ['Q'])
         q1 = self.get_group_data(1, self.df_test_resampled, ['Q'])
 
-        fstats, pval = fligner(q0, q1, center=mode)
+        with warnings.catch_warnings(): # supress scipy warnings
+            warnings.filterwarnings('ignore')
+            fstats, pval = fligner(q0, q1, center=mode)
 
         stats_fk = {'z': fstats, 'pval': pval}
 

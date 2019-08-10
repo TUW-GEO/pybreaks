@@ -17,10 +17,10 @@ class TestHorizontalErrors(unittest.TestCase):
         pass
 
     def setUp(self):
-        self.df, self.breaktime = create_artificial_test_data(type='const')
+        self.df, breaktime, timeframe = create_artificial_test_data(type='const')
         self.test = HorizontalVal(candidate=self.df.candidate,
                                   reference=self.df.reference,
-                                  breaktime=self.breaktime)
+                                  breaktime=breaktime)
 
     def tearDown(self):
         pass
@@ -30,6 +30,9 @@ class TestHorizontalErrors(unittest.TestCase):
 
         df_change = self.test.run(comparison_method=comparison_method)
         df_groupstats = self.test.df_group_stats
+
+        col = 'group0_group1'
+        df_change = df_change[col]
 
         mean_diff = df_change['{}_mean_Diff'.format(comparison_method)]
         median_diff = df_change['{}_median_Diff'.format(comparison_method)]
@@ -76,6 +79,8 @@ class TestHorizontalErrors(unittest.TestCase):
         assert d == 1
         d = compare(1., 2., 'Ratio')
         assert d == 0.5
+        d = compare(1., 0., 'Ratio') # Div0
+        assert np.isnan(d)
         d = compare(1., 2., 'Diff')
         assert d == -1
 

@@ -12,7 +12,7 @@ from helper_functions import read_test_data, dict_depth, create_artificial_test_
 def test_conditions():
     ''' Test conditions for the calculation of test statistics'''
 
-    df, _ = read_test_data(431790)
+    df = read_test_data(431790)
     breaktime = datetime(2000,7,1)
 
     # will not raise error
@@ -62,7 +62,7 @@ def test_conditions():
 def test_mean_break():
     ''' Test mean break detection'''
 
-    df_mean, breaktime = create_artificial_test_data('mean')
+    df_mean, breaktime, timeframe = create_artificial_test_data('mean')
 
     test = TsRelBreakTest(candidate=df_mean.candidate,
                           reference=df_mean.reference,
@@ -86,7 +86,7 @@ def test_mean_break():
 def test_var_break():
     '''Test var break detection'''
 
-    df, breaktime = create_artificial_test_data('var')
+    df, breaktime, timeframe = create_artificial_test_data('var')
 
     test = TsRelBreakTest(candidate=df.candidate,
                           reference=df.reference,
@@ -111,7 +111,7 @@ def test_var_break():
 def test_merge_results():
     '''Test function for merged results dict'''
 
-    df, _ = read_test_data(431790)
+    df = read_test_data(431790)
     breaktime = datetime(2000, 7, 1)
 
     test = TsRelBreakTest(candidate=df['CCI_41_COMBINED'],
@@ -131,7 +131,7 @@ def test_merge_results():
 
 def test_meta_dict():
     ''' Test creation of meta info dict'''
-    df, _ = read_test_data(431790)
+    df = read_test_data(431790)
     breaktime = datetime(2000, 7, 1)
 
     test = TsRelBreakTest(candidate=df['CCI_41_COMBINED'],

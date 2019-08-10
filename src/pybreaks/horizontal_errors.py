@@ -9,43 +9,51 @@ from datetime import datetime
 import numpy as np
 from scipy import stats as scistats
 from pytesmo import metrics
+import os
+import warnings
+
+os.environ["PYDEVD_USE_FRAME_EVAL"] = "NO"
 
 
 def compare(v0, v1, how='AbsDiff'):
-    '''
+    """
     Takes the horizontal comparison metrics for a candidate set and compares it to the metric
     for a reference data set via the selected function:
 
     Parameters
     ----------
     v0 : float
-        Value 0
+        Value 0 (first in operation)
     v1 : float
-        Value 1
+        Value 1 (second in operation)
     how : str
-        How to compare the 2 numbers
+        Implemented comparison operation.
 
     Returns
     -------
     error : float
         The error from comparing the 2 inputs via the comparison method
-    '''
+    """
+    v0, v1 = float(v0), float(v1)
 
     if np.isnan(v0) or np.isnan(v1):
         return np.nan
 
     if how == 'Ratio':
         try:
-            rat = float(v0) / float(v1)
+            with np.errstate(divide='ignore', invalid='ignore'):
+                rat = np.true_divide(v0, v1)
+            if np.isinf(rat):
+                raise ZeroDivisionError
         except ZeroDivisionError:
             rat = np.nan
         return rat
     elif how == 'Diff':
-        return float(v0) - float(v1)
+        return v0 - v1
     elif how == 'AbsDiff':
-        return np.abs(float(v0) - float(v1))
+        return np.abs(v0 - v1)
     else:
-        raise Exception('Unknown definition to combine the metrics')
+        raise ValueError(how, "Unknown definition to combine the metrics")
 
 
 class HorizontalVal(object):
@@ -164,14 +172,15 @@ class HorizontalVal(object):
         # from basic stats
         for var, meth in self.stats:
             for group in ['group0', 'group1', 'FRAME']:
-                candidate_metric = self.df_group_stats.loc[
-                    '{}_{}'.format(var, self.candidate_name), group]
-                reference_metric = self.df_group_stats.loc[
-                    '{}_{}'.format(var, self.reference_name), group]
+                index = '{}_{}'.format(var, self.candidate_name)
+                candidate_metric = self.df_group_stats.loc[index, group]
+                index = '{}_{}'.format(var, self.reference_name)
+                reference_metric = self.df_group_stats.loc[index, group]
 
                 vmetric = compare(candidate_metric, reference_metric, meth)
 
-                df_groupstats_compare.at['%s_%s' % (var, meth), group] = vmetric
+                index = '{}_{}'.format(var, meth)
+                df_groupstats_compare.loc[index, group] = vmetric
 
         return df_groupstats_compare
 
@@ -211,7 +220,7 @@ class HorizontalVal(object):
             hmetric = compare(s0, s1, how)
             df_metric_change.at['%s_%s' % (how, var)] = hmetric
 
-        return df_metric_change
+        return df_metric_change.to_frame('group0_group1')
 
     def _calc_validation_metrics(self):
         """
@@ -268,8 +277,11 @@ class HorizontalVal(object):
                 if any([subset_data[col].empty for col in [self.candidate_name, self.reference_name]]):
                     pr, pp = np.nan, np.nan
                 else:
-                    pr, pp =metrics.pearsonr(subset_data[self.reference_name].values,
-                                             subset_data[self.candidate_name].values)
+                    with warnings.catch_warnings():  # supress scipy warnings
+                        warnings.filterwarnings('ignore')
+                        pr, pp =metrics.pearsonr(subset_data[self.reference_name].values,
+                                                 subset_data[self.candidate_name].values)
+
                 df_validation_metrics.at['PearsonR', '%s' % group] = pr
                 df_validation_metrics.at['Pp', '%s' % group] = pp
 
@@ -277,8 +289,11 @@ class HorizontalVal(object):
                 if any([subset_data[col].empty for col in [self.candidate_name, self.reference_name]]):
                     sr, sp = np.nan, np.nan
                 else:
-                    sr, sp = metrics.spearmanr(subset_data[self.reference_name].values,
-                                               subset_data[self.candidate_name].values)
+                    with warnings.catch_warnings():  # supress scipy warnings
+                        warnings.filterwarnings('ignore')
+                        sr, sp = metrics.spearmanr(subset_data[self.reference_name].values,
+                                                   subset_data[self.candidate_name].values)
+
                 df_validation_metrics.at['SpearmanR', '%s' % group] = sr
                 df_validation_metrics.at['Sp', '%s' % group] = sp
 

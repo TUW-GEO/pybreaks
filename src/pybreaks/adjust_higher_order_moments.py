@@ -10,8 +10,12 @@ from pybreaks.model_poly_regress import HigherOrderRegression
 from scipy.interpolate import interp1d
 import statsmodels.api as sm
 from scipy.stats import ttest_rel, pearsonr
-from pybreaks.lmoments_ks import FitCDF
 import os
+
+try:
+    from pybreaks.lmoments_ks import FitCDF
+except ImportError:
+    from pybreaks.lmoments_ks_py2 import FitCDF2 as FitCDF
 
 '''
 Quanitify differences in 2 parts of a time series using the Higher Order Moments
