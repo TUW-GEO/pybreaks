@@ -326,6 +326,9 @@ def mid_month_target_values(M):
                    [0., 0., 0., 0., 0., 0., 0., 0., 0., 1./8., 6./8., 1./8.],
                    [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1./8., 7./8.]])
 
+    if A.shape[0] != M.shape[0]:
+        raise ValueError(M.shape[0], 'Dimension Mismatch between A Matrix and M')
+
     T = np.matmul(np.linalg.inv(A), M)
 
     return np.squeeze(np.asarray(T))
@@ -350,7 +353,7 @@ def dt_freq(dt, ignore_M=False):
         Do not attempt to find out if the daily freq is monthly or lower (slow)
     '''
     if dt.freq is not None: # if we have the info, it's trivial
-        return dt.freq
+        return dt.freq.n, dt.freq.name
 
 
     months, years = dt.month.values, dt.year.values

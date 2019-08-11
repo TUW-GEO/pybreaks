@@ -22,7 +22,7 @@ dependencies:
 #  - parse
 #  - pyyaml
   - statsmodels
-  - lmoments3
+  - git+https://github.com/OpenHydrology/lmoments3@develop
   - matplotlib
   - seaborn
 #  - xarray

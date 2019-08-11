@@ -51,6 +51,16 @@ def create_artificial_test_data(type):
                                                end='2000-12-31', freq='D'),
                           data = {'candidate': ([10,11]*(91) + [50,51]*(92)),
                                   'reference': [30, 31] * 183})
+    elif type == 'norm_mean':
+        # data with a mean break
+        np.random.seed(12345)
+        can_p1 = np.random.normal(25, 1, 91*2)
+        can_p2 = np.random.normal(35, 1, 92*2)
+        ref = np.random.normal(30, 1,183*2)
+        df = pd.DataFrame(index= pd.date_range(start='2000-01-01',
+                                               end='2000-12-31', freq='D'),
+                          data = {'candidate': np.concatenate((can_p1, can_p2), axis=0),
+                                  'reference': ref})
     elif type == 'const': # constant can and ref
         # data with constant frame values
         df = pd.DataFrame(index=pd.date_range(start='2000-01-01',

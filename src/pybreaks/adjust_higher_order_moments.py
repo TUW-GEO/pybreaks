@@ -12,9 +12,10 @@ import statsmodels.api as sm
 from scipy.stats import ttest_rel, pearsonr
 import os
 
-try:
+import sys
+if sys.version_info[0] > 2:
     from pybreaks.lmoments_ks import FitCDF
-except ImportError:
+else:
     from pybreaks.lmoments_ks_py2 import FitCDF2 as FitCDF
 
 '''
@@ -26,12 +27,15 @@ quantification than for the correction, i.e. we assume that the corrections can
 be applied to an extended set of input values.
 '''
 
-# TODO #################################
-# (+) WAK and GPA seem not to work properly in the lmoments package.
+# TODO:
+#   (++) OBS-PRED leads to negative corrections (must be substraced), use PRED-OBS to
+#       derive corrections that can be added.
+#   (+) WAK and GPA seem not to work properly in the lmoments package.
+#   (+) lookup in CDF fails if the quantiles are very different (synthetic use case)
 
-# NOTES ################################
-# - Selection of poly order could be based on comparing distributions of residuals
-#   with models of different order (ttest, significantly lower mean of residuals)
+# NOTE:
+#   - Selection of poly order could be based on comparing distributions of residuals
+#     with models of different order (ttest, significantly lower mean of residuals)
 
 
 def quant_bin(cdf, ds, n_bins=None):
@@ -120,12 +124,12 @@ class HigherOrderMoments(TsRelBreakBase):
         adjust_group : int, optional (default = 0)
             What part of the candidate should be adjusted
             (0 = before breaktime, 1 = after breaktime)
-        poly_orders : list, optional (default: [1,2,3])
+        poly_orders : list or int, optional (default: [1,2])
             Poly. degrees that are tested to find the best fitting model in terms
             of minimizing the RSS.
-        select_by : str, optional (default : ttest)
+        select_by : str or None, optional (default : 'R')
             Method to use to find the best fitting model for
-            Either ttest or R.
+            Either ttest or R or None (requires single option for poly_orders).
         cdf_types : list or None, optional (default: None)
             List of potential CDFs that are tested, if None are passed, all
             implemented ones are used. This should correspond with the Adjustment
@@ -161,8 +165,16 @@ class HigherOrderMoments(TsRelBreakBase):
             self.ref_regress, best_p, ref_perf = self._best_model_R(group=self.ref_group,
                                                                     thresR=0.8,
                                                                     thresP=0.05)
+        elif not select_by:
+            if isinstance(poly_orders, int):
+                poly_orders = [poly_orders]
+            if len(poly_orders) > 1:
+                raise ValueError(poly_orders, "Either specify the poly order or select a method for selection")
+            best_p = poly_orders[0]
+            self.ref_regress = self._calc_model(group=self.ref_group,
+                                                poly_order=best_p)
         else:
-            raise ValueError(select_by, 'Unknown method for finding the best fitting regression')
+            raise ValueError(select_by, "Unknown method to detect the polynomial regression order.")
         # this is optional
         self.obs_regress = self._calc_model(group=self.adj_group, poly_order=best_p)
 
@@ -801,14 +813,14 @@ class HigherOrderMomentsAdjust(object):
             fig = None
 
         x = self.df_obs_quant.index.values
-        ax.scatter(x, self.df_obs_quant['residuals'].values,
+        ax.scatter(x, -1* self.df_obs_quant['residuals'].values, # todo: change -1
                    alpha=0.3, label='Residuals', color='grey')
-        ax.plot(x, self.df_obs_quant['adjustments'], label='adjustments', color='blue',
-                linestyle='--')
+        ax.plot(x, -1 * self.df_obs_quant['adjustments'], label='adjustments', color='blue',
+                linestyle='--') # todo: change -1
 
         if not raw_plot:
             ax.set_xlabel('Quantile')
-            ax.set_ylabel('SM Residuals (OBS - PRED)')
+            ax.set_ylabel('SM Residuals (PRED - OBS)')
 
             if not self.from_bins:
                 ax.set_title('HOM Adjustments', y=1.15)
@@ -819,7 +831,7 @@ class HigherOrderMomentsAdjust(object):
             x = np.linspace(0, 1, 100)
             adjustments = self.fadjust(x)
             medianprops = dict(linestyle='-', linewidth=2.5, color='black')
-            ax2.boxplot(data, sym='', showmeans=False, widths=norm_widths,
+            ax2.boxplot([-1 * d for d in data], sym='', showmeans=False, widths=norm_widths, # todo: change -1
                         positions=np.linspace(0.5, 9.5, len(bins)).tolist(),
                         medianprops=medianprops,
                         labels=range(1, len(bins)+1))
@@ -914,7 +926,12 @@ class HigherOrderMomentsAdjust(object):
         self.df_adjust = df_adjust
         # find the adjustment for each observation accordingly
         values_to_adjust['adjustments'] = df_adjust.set_index('date').sort_index()['adjustments']
-        values_to_adjust['adjusted'] = values_to_adjust['can'] - values_to_adjust['adjustments']
+
+        self.adjustments = values_to_adjust['adjustments'] # TODO: *-1 to add them?
+
+        values_to_adjust['adjusted'] = values_to_adjust['can'] - self.adjustments # todo: + instead of -
+
+
 
         return values_to_adjust['adjusted']
 
