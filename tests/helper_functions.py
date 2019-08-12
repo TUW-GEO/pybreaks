@@ -5,7 +5,6 @@ from datetime import datetime
 import os
 import numpy as np
 
-
 def dict_depth(d):
     if isinstance(d, dict):
         return 1 + (max(map(dict_depth, d.values())) if d else 0)
@@ -20,12 +19,7 @@ def read_test_data(gpi, scale_factor=1.):
         Grid Point Index of a point for which test data is stored
     scale_factor: float, optional (default: 1.0)
         Factor that the read time series is multiplied with
-
-    Returns
-    -------
-
     """
-    #for file in os.listdir(path)
     file = 'data_{}.csv'.format(gpi)
     testdata_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                  'test-data', 'csv_ts', file)

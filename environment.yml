@@ -7,25 +7,14 @@ dependencies:
 - netCDF4
 - scipy
 - pandas
-#- typing
-#- toolz
-#- cartopy
+- pyproj # for pytesmo
+- pip
 - pip:
-#  - multiprocessing
   - datetime
-#  - smecv_grid
   - scikit-learn
-#  - rsdata
-#  - rsroot
-#  - pynetcf
-#  - pygeogrids
-#  - parse
-#  - pyyaml
   - statsmodels
-  - git+https://github.com/OpenHydrology/lmoments3@develop
   - matplotlib
   - seaborn
-#  - xarray
   - pytesmo
 
 

@@ -128,7 +128,7 @@ class Test_qcm_synthetic(unittest.TestCase):
     def test_correct_resample_interpolate(self):
         assert self.qcm.candidate_col_name == 'can'
         assert self.qcm.candidate_col_name == 'ref'
-        
+
         assert self.can_adjusted.index.size == self.values_to_adjust.index.size
 
         corrections = self.qcm.adjust_obj.adjustments

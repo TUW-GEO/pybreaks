@@ -120,7 +120,7 @@ class QuantileCatMatch(TsRelBreakBase):
         n_quantiles : int, optional
             Number of percentiles that are fitted (equal distribution)
             (0 and 100 are always considered) must be >=1.
-            Default is 12 quantile categories.
+            Default is 4 quantile categories.
         first_last : str, optional (default: 'formula')
             'formula', 'equal' or 'None'
             Select 'formula' to calc the boundary values after the formula or
@@ -476,10 +476,7 @@ class QuantileCatMatch(TsRelBreakBase):
                 # difference of category differences means
                 self.plot_model('diff', ax, True)
                 if self.adjust_obj is not None:
-                    interpol_diff = self.adjust_obj.df_cf['adj']
-                    # interpolation, if already done
-                    ax.plot(interpol_diff.index, interpol_diff.values, linestyle='--',
-                            color='red', label='cubic spline')
+                    ax = self.plot_adjustments(ax)
                 if not supress_title:
                     ax.set_title('Category Differences')
                 ax.set_xlabel('Cumulative Frequency')
@@ -488,6 +485,10 @@ class QuantileCatMatch(TsRelBreakBase):
 
         plt.tight_layout()
         return plot_coll_fig
+
+    def plot_adjustments(self, ax=None):
+        return self.adjust_obj.plot_adjustments(ax=ax)
+
 
     @staticmethod
     def plot_pdf(data, style, ax, name='can', dist_fit=stats.norm, cumulative=False):
@@ -948,6 +949,7 @@ class QuantileCatMatchAdjust(object):
                                     adjustments_col_name='adjustments')
 
         self.df = df
+        self.adjustments = self.df['adjustments']
 
         return df['adjusted']
 
@@ -995,25 +997,26 @@ class QuantileCatMatchAdjust(object):
 
     def plot_adjustments(self, ax=None):
         """
-        Crate a plot of the interpolated
+        Crate a plot of the interpolated corrections
 
         Parameters
         -------
         ax : plt.Axes, optional (default: None)
             Use this axis object instead to create the plot in
-
-        Returns
-        -------
-        fig : plt.figure or None
-            The figure that was created
+        cf: bool, optional (default: True)
+            Plot adjustments over CF, otherwise plot the adjustments over time.
         """
+        if ax is None:
+            fig, ax = plt.subplots(1,1)
 
-        raise NotImplementedError('Adjustments can be found in the model plot')
+        interpol_diff = self.df_cf['adj']
+        # interpolation, if already done
+        ax.plot(interpol_diff.index, interpol_diff.values, linestyle='--',
+                color='red', label='cubic spline')
+        return ax
 
 def usecase():
-    from cci_breaks.cci_timeframes import CCITimes
     from data_read_write.otherfunctions import smart_import
-    from pybreaks.src.pybreaks.break_test import TsRelBreakTest
     from datetime import datetime
 
     gpi = 444772  # bad: 395790,402962

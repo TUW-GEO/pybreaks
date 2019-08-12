@@ -5,7 +5,7 @@ import numpy as np
 from scipy import stats
 from statsmodels.distributions.empirical_distribution import ECDF
 from functools import partial
-import lmoments as lm
+import pybreaks.lmoments as lm
 
 class FitCDF2(object):
     '''
@@ -257,7 +257,7 @@ class FitCDF2(object):
         return ax
 
 
-    def plot_cdf(self, plot_emp=True, name=None, xlabel='SM', style=None, ax=None):
+    def plot_cdf(self, plot_empirical=True, name=None, xlabel='SM', style=None, ax=None):
         '''
         Plot the CDF
         '''
@@ -279,7 +279,7 @@ class FitCDF2(object):
             name = ''
 
         # empirical CDF
-        if plot_emp:
+        if plot_empirical:
             ecdf = ECDF(self.src)
             ax.scatter(ecdf.x, ecdf.y, label='%s empirical' % name, color=color,
                        alpha=0.3, marker='o', facecolors='none')
@@ -287,7 +287,7 @@ class FitCDF2(object):
         # fitted cdf (selected type)
         x = sorted(self.src)
         y = self._cdf(x)
-        if not plot_emp:
+        if not plot_empirical:
             c = style[0]
         else:
             c = 'black'
@@ -303,3 +303,24 @@ class FitCDF2(object):
 
         return ax
 
+def usecase():
+    '''General Usecase that fits some dist to some random test data.'''
+    import pandas as pd
+    # Gaussian distributed
+    mu, sigma = 0.5, 0.25  # mean and standard deviation
+    norm_rand_data = np.random.normal(mu, sigma, 366)
+
+    src = pd.Series(index=pd.date_range('2000-01-01', '2000-12-31', freq='D'),
+                        data=norm_rand_data)
+
+    fit = FitCDF2(src=src, types=None)
+
+    fit.plot_cdf(plot_emp=True, name='TESTCDF', xlabel='testdata', style=('red', '--'),
+                 ax=None)
+    fit.plot_pdf(plot_emp=True, name='TESTPDF', xlabel='testdata', style=('green', ':'),
+                 ax=None)
+
+    fit.cdf_deciles(5)
+
+if __name__ == '__main__':
+    usecase()

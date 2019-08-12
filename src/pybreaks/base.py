@@ -11,17 +11,17 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.cbook as cbook
 
-'''
+"""
 This is the base class for break detection and adjustment. It contains methods 
 that come in handy when creating data frames, splitting data for groups depending 
 on the break time and for bias correction between candidate and reference.
+"""
 
-TODO #################################
-(+)
-
-NOTES ################################
-- Reference CDF scaling uses the same percentiles always, give option?
-'''
+# TODO:
+#   (+) Make the plot_stats_ts function return nicer results
+#----------
+# NOTES:
+#   - Reference CDF scaling uses the same percentiles always, give option to select?
 
 class TsRelBreakBase(object):
     def __init__(self, candidate, reference, breaktime,
@@ -557,7 +557,7 @@ class TsRelBreakBase(object):
 
         return ax
 
-    def plot_stats_ts(self, frame, kind='box', save_path=None, title=None):
+    def plot_stats_ts(self, frame, kind='box', save_path=None, title=None, stats=False):
         """
         Create a plot of candidate and reference time series for the tested period.
         Indicates whether a break was found or not.
@@ -626,7 +626,7 @@ class TsRelBreakBase(object):
                                       ref_name='REF',
                                       adj_name='ADJ' if 'ADJ' in plot_df.columns else None,
                                       comp_meth='AbsDiff', digits=5)
-
+        horizontal_errors = horizontal_errors['group0_group1']
         stats_df = pd.DataFrame(index=plot_df.index)
         g0_index = self.get_group_data(0, plot_df, None)
         g1_index = self.get_group_data(1, plot_df)
@@ -694,14 +694,14 @@ class TsRelBreakBase(object):
         else:
             raise ValueError(kind, 'Unknown style, choose box or line')
 
-        # text stats in last panel
-        col_strs = []
-        for name, val in horizontal_errors.to_dict().items():
-            col_strs.append('%s: %f' % (name, val))
-        col_str = '\n'.join(col_strs)
-        ax = plt.subplot(rows, cols, 13)
-        ax.text(0.5, 1, col_str, fontsize=8, va='top', ha='center')
-        ax.axis('off')
+        if stats:
+            # text stats in last panel
+            n = horizontal_errors.index.size
+            for i, r in enumerate([(0, n//2), (n//2, n)]):
+                ax = plt.subplot(rows, cols, 13 + i)
+                ax.text(0.5, 1, horizontal_errors.iloc[r[0]:r[1]].to_string(), fontsize=8,
+                        va='top', ha='center')
+                ax.axis('off')
 
         plt.tight_layout()
 
