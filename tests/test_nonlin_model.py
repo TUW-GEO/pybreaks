@@ -2,9 +2,8 @@
 
 
 from pybreaks.model_poly_regress import HigherOrderRegression
-import pandas as pd
 from pytesmo.scaling import linreg_stored_params, linreg_params
-from helper_functions import read_test_data, create_artificial_test_data
+from tests.helper_functions import read_test_data, create_artificial_test_data
 import unittest
 import numpy as np
 from datetime import datetime

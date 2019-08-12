@@ -7,7 +7,7 @@ TODO:
     - The function itself needs some updates and testing (lmoments)
 """
 
-from helper_functions import read_test_data, create_artificial_test_data
+from tests.helper_functions import read_test_data, create_artificial_test_data
 import unittest
 from pybreaks.adjust_higher_order_moments import HigherOrderMoments
 from datetime import datetime, timedelta

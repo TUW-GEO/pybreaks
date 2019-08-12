@@ -5,7 +5,7 @@ from pybreaks.model_lin_regress import LinearRegression
 import pandas as pd
 import numpy as np
 from pytesmo.scaling import linreg_stored_params, linreg_params
-from helper_functions import read_test_data, create_artificial_test_data
+from tests.helper_functions import read_test_data, create_artificial_test_data
 import numpy.testing as nptest
 import unittest
 from datetime import datetime

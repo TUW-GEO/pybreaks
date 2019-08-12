@@ -5,7 +5,7 @@ Test the verification module that is used within the break correction
 '''
 
 from pybreaks.horizontal_errors import HorizontalVal, compare
-from helper_functions import create_artificial_test_data
+from tests.helper_functions import create_artificial_test_data
 import unittest
 import numpy as np
 

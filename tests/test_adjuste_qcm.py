@@ -4,7 +4,7 @@ TODO:
     -
 """
 
-from helper_functions import read_test_data, create_artificial_test_data
+from tests.helper_functions import read_test_data, create_artificial_test_data
 import unittest
 from pybreaks.adjust_freq_quantile_matching import QuantileCatMatch, _init_rank
 from datetime import datetime, timedelta
@@ -127,7 +127,7 @@ class Test_qcm_synthetic(unittest.TestCase):
 
     def test_correct_resample_interpolate(self):
         assert self.qcm.candidate_col_name == 'can'
-        assert self.qcm.candidate_col_name == 'ref'
+        assert self.qcm.reference_col_name == 'ref'
 
         assert self.can_adjusted.index.size == self.values_to_adjust.index.size
 

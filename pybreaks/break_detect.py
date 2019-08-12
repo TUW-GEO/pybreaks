@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from pybreaks.src.pybreaks.base import TsRelBreakBase
-from pybreaks.src.pybreaks.utils import df_conditional_temp_resample
-from pybreaks.src.pybreaks.model_lin_regress import LinearRegression
+from pybreaks.base import TsRelBreakBase
+from pybreaks.utils import df_conditional_temp_resample
+from pybreaks.model_lin_regress import LinearRegression
 
 
 import pandas as pd

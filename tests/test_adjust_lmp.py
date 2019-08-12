@@ -6,7 +6,7 @@ TODO:
     - Test the corrections from core option
 """
 
-from helper_functions import read_test_data, create_artificial_test_data
+from tests.helper_functions import read_test_data, create_artificial_test_data
 import unittest
 from pybreaks.adjust_linear_model_pair_fitting import RegressPairFit, PairRegressMatchAdjust
 from datetime import datetime, timedelta

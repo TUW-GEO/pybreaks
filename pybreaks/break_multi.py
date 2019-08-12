@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-from pybreaks.src.pybreaks.timeframes import TsTimeFrames
+from pybreaks.timeframes import TsTimeFrames
 import pandas as pd
 import matplotlib.pyplot as plt
-from pybreaks.src.pybreaks.base import TsRelBreakBase
+from pybreaks.base import TsRelBreakBase
 import warnings
 from datetime import datetime
-from pybreaks.src.pybreaks.break_test import TsRelBreakTest
-from pybreaks.src.pybreaks.break_adjust import TsRelBreakAdjust
+from pybreaks.break_test import TsRelBreakTest
+from pybreaks.break_adjust import TsRelBreakAdjust
 import os
 from functools import partial
 

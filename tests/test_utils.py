@@ -5,7 +5,7 @@ from pybreaks.utils import merge_dicts, dt_freq, conditional_temp_resample, \
     mid_month_target_values, filter_by_quantiles
 import numpy as np
 import pandas as pd
-from helper_functions import read_test_data
+from tests.helper_functions import read_test_data
 
 should_days_in_month = np.array([31., 29., 31., 30., 31., 30., 31., 31., 30., 31., 30., 31.])
 
