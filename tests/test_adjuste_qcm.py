@@ -18,7 +18,7 @@ import pandas as pd
 class Test_qcm_realdata(unittest.TestCase):
 
     @classmethod
-    def setUpClass(cls) -> None:
+    def setUpClass(cls):
         ts = read_test_data(654079)
         ts.rename(columns={'CCI': 'can',
                            'REF': 'ref'}, inplace=True)
@@ -37,7 +37,7 @@ class Test_qcm_realdata(unittest.TestCase):
                                  **hom_kwargs)
         cls.qcm = qcm
 
-    def setUp(self) -> None:
+    def setUp(self):
         (res, freq) = dt_freq(self.qcm.df_original.index)
         assert (res, freq) == (1., 'D')
 
@@ -45,7 +45,7 @@ class Test_qcm_realdata(unittest.TestCase):
                            datetime(2000, 1, 1):self.qcm.breaktime, 'can'].dropna()
         self.can_adjusted = self.qcm.adjust(self.values_to_adjust, interpolation_method='cubic')
 
-    def tearDown(self) -> None:
+    def tearDown(self):
         plt.close('all')
 
     def test_plots(self):
@@ -90,7 +90,7 @@ class Test_qcm_realdata(unittest.TestCase):
 class Test_qcm_synthetic(unittest.TestCase):
 
     @classmethod
-    def setUpClass(cls) -> None:
+    def setUpClass(cls):
         ts, breaktime, timeframe = create_artificial_test_data('norm_mean')
         ts.rename(columns={'candidate': 'can',
                            'reference': 'ref'}, inplace=True)
@@ -106,14 +106,14 @@ class Test_qcm_synthetic(unittest.TestCase):
                                **hom_kwargs)
         cls.qcm = qcm
 
-    def setUp(self) -> None:
+    def setUp(self):
         (res, freq) = dt_freq(self.qcm.df_original.index)
         assert (res, freq) == (1., 'D')
 
         self.values_to_adjust = self.ts_full.loc[:self.qcm.breaktime, 'can'].dropna()
         self.can_adjusted = self.qcm.adjust(self.values_to_adjust, interpolation_method='cubic')
 
-    def tearDown(self) -> None:
+    def tearDown(self):
         plt.close('all')
 
     def test_plots(self):

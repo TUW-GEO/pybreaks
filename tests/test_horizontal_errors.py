@@ -13,7 +13,7 @@ import numpy as np
 class TestHorizontalErrors(unittest.TestCase):
 
     @classmethod
-    def setUpClass(cls) -> None:
+    def setUpClass(cls):
         pass
 
     def setUp(self):

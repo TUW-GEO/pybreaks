@@ -15,6 +15,7 @@ dependencies:
   - statsmodels
   - matplotlib
   - seaborn
+  - smecv_grid
   - pytesmo
 
 

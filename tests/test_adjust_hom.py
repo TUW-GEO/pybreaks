@@ -15,12 +15,14 @@ from pybreaks.utils import dt_freq
 import numpy as np
 from pprint import pprint
 import matplotlib.pyplot as plt
+import sys
 
 
-class Test_hom_realdata_model_m(unittest.TestCase):
+#@unittest.skipIf(sys.version[0]=='2', 'lmoments3 only available for python 3')
+class Test_hom_lmom3_realdata_model_m(unittest.TestCase):
 
     @classmethod
-    def setUpClass(cls) -> None:
+    def setUpClass(cls):
         ts = read_test_data(654079)
         ts.rename(columns={'CCI': 'can',
                            'REF': 'ref'}, inplace=True)
@@ -43,10 +45,10 @@ class Test_hom_realdata_model_m(unittest.TestCase):
                                  **hom_kwargs)
         cls.hom = hom
 
-    def setUp(self) -> None:
+    def setUp(self):
         pass
 
-    def tearDown(self) -> None:
+    def tearDown(self):
         plt.close('all')
 
     def test_plot_models(self):
@@ -88,10 +90,11 @@ class Test_hom_realdata_model_m(unittest.TestCase):
         np.testing.assert_almost_equal(model['filter_p'],  5.)
 
 
-class Test_hom_realdata_model_d(unittest.TestCase):
+#@unittest.skipIf(sys.version[0]=='2', 'lmoments3 only available for python 3')
+class Test_hom_lmom3_realdata_model_d(unittest.TestCase):
 
     @classmethod
-    def setUpClass(cls) -> None:
+    def setUpClass(cls):
         ts = read_test_data(654079)
         ts.rename(columns={'CCI': 'can',
                            'REF': 'ref'}, inplace=True)
@@ -114,10 +117,10 @@ class Test_hom_realdata_model_d(unittest.TestCase):
                                  **hom_kwargs)
         cls.hom = hom
 
-    def setUp(self) -> None:
+    def setUp(self):
         pass
 
-    def tearDown(self) -> None:
+    def tearDown(self):
         plt.close('all')
 
     def test_plot_models(self):
@@ -180,10 +183,11 @@ class Test_hom_realdata_model_d(unittest.TestCase):
         fig_adjustments = self.hom.plot_adjustments()
 
 
-class Test_hom_synthetic_model_d(unittest.TestCase):
+#@unittest.skipIf(sys.version[0]=='2', 'lmoments3 only available for python 3')
+class Test_hom_lmom3_synthetic_model_d(unittest.TestCase):
 
     @classmethod
-    def setUpClass(cls) -> None:
+    def setUpClass(cls):
         ts, breaktime, timeframe = create_artificial_test_data('norm_mean')
 
         ts.rename(columns={'candidate': 'can',
@@ -206,10 +210,10 @@ class Test_hom_synthetic_model_d(unittest.TestCase):
                                  **hom_kwargs)
         cls.hom = hom
 
-    def setUp(self) -> None:
+    def setUp(self):
         pass
 
-    def tearDown(self) -> None:
+    def tearDown(self):
         plt.close('all')
 
     def test_plots(self):

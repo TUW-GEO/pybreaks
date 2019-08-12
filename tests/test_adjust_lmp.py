@@ -18,7 +18,7 @@ from pprint import pprint
 class Test_lmp_realdata_model_m(unittest.TestCase):
 
     @classmethod
-    def setUpClass(cls) -> None:
+    def setUpClass(cls):
         ts = read_test_data(654079)
         ts.rename(columns={'CCI': 'can',
                            'REF': 'ref'}, inplace=True)
@@ -40,10 +40,10 @@ class Test_lmp_realdata_model_m(unittest.TestCase):
                              **lmp_kwargs)
         cls.lmp = lmp
 
-    def setUp(self) -> None:
+    def setUp(self):
         pass
 
-    def tearDown(self) -> None:
+    def tearDown(self):
         pass
 
     def test_correct_resample_interpolate(self):
@@ -111,7 +111,7 @@ class Test_lmp_realdata_model_m(unittest.TestCase):
 class Test_lmp_realdata_model_d(unittest.TestCase):
 
     @classmethod
-    def setUpClass(cls) -> None:
+    def setUpClass(cls):
         ts = read_test_data(654079)
         ts.rename(columns={'CCI': 'can',
                            'REF': 'ref'}, inplace=True)
@@ -133,10 +133,10 @@ class Test_lmp_realdata_model_d(unittest.TestCase):
                              **lmp_kwargs)
         cls.lmp = lmp
 
-    def setUp(self) -> None:
+    def setUp(self):
         pass
 
-    def tearDown(self) -> None:
+    def tearDown(self):
         pass
 
     def test_correct_resample_interpolate(self):
@@ -206,7 +206,7 @@ class Test_lmp_realdata_model_d(unittest.TestCase):
 class Test_lmp_synthetic_model_d(unittest.TestCase):
 
     @classmethod
-    def setUpClass(cls) -> None:
+    def setUpClass(cls):
         ts, breaktime, timeframe = create_artificial_test_data('mean')
 
         ts.rename(columns={'candidate': 'can',
@@ -228,10 +228,10 @@ class Test_lmp_synthetic_model_d(unittest.TestCase):
                              **lmp_kwargs)
         cls.lmp = lmp
 
-    def setUp(self) -> None:
+    def setUp(self):
         pass
 
-    def tearDown(self) -> None:
+    def tearDown(self):
         pass
 
     def test_correct_resample_interpolate(self):

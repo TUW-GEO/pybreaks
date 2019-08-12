@@ -13,7 +13,7 @@ from datetime import datetime
 class TestLinearRegress(unittest.TestCase):
 
     @classmethod
-    def setUpClass(cls) -> None:
+    def setUpClass(cls):
         pass
 
     def tearDown(self):

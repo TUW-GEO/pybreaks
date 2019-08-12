@@ -15,7 +15,7 @@ from pprint import pprint
 class TestBaseArtificial(unittest.TestCase):
 
     @classmethod
-    def setUpClass(cls) -> None:
+    def setUpClass(cls):
         pass
 
     def setUp(self):
@@ -151,7 +151,7 @@ class TestBaseArtificial(unittest.TestCase):
 class TestBaseReal(unittest.TestCase):
 
     @classmethod
-    def setUpClass(cls) -> None:
+    def setUpClass(cls):
         cls.start = datetime(1998,1,1)
         cls.end = datetime(2007,1,1)
         original_data= read_test_data(431790)
