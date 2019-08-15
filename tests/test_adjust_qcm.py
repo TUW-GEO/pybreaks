@@ -49,7 +49,7 @@ class Test_qcm_realdata(unittest.TestCase):
         plt.close('all')
 
     def test_plots(self):
-        # todo test plots
+        # todo: compare to reference plots
         self.qcm.plot_models()
         self.qcm.plot_adjustments()
         self.qcm.plot_cdf_compare()
