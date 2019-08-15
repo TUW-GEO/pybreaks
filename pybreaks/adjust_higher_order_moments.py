@@ -866,7 +866,7 @@ class HigherOrderMomentsAdjust(object):
         """
         df = self.df_obs_quant.loc[:, ('residuals', 'bin')]
 
-        # frac is the smooting parameter
+        # frac is the smoothing parameter
         if self.from_bins:
             df = df.groupby(['bin']).mean()
             df.at[1.0] = np.nan

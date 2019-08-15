@@ -541,6 +541,7 @@ class TsRelBreakAdjust(TsRelBreakBase):
         stats, vert_met, hor_err = self.get_validation_stats(
             frame, columns=cols, can_name='CAN', ref_name='REF', adj_name='ADJ')
 
+        hor_err = hor_err['group0_group1']
         # BIAS FIT CHECK ###
         can_bias_diff = hor_err['CAN_REF_AbsDiff_bias']
         adj_bias_diff = hor_err['ADJ_REF_AbsDiff_bias']

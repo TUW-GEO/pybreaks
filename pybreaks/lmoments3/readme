@@ -1,6 +1,6 @@
-lmoments is provided via pypi: https://pypi.org/project/lmoments3/ and on github:
+lmoments is published via pypi: https://pypi.org/project/lmoments3/ and on github:
 https://github.com/OpenHydrology/lmoments3
-The source code was copied here as the original package is no longer maintained
+The source code has been copied as the original package is no longer maintained
 and contained some bugs.
-If the original repository is updated and maintained in future, this module will be deleted
-and the original repository will be added as a dependency.
+If the original repository is updated and maintained in future, this module will
+be deleted and the original repository will be added as a dependency.

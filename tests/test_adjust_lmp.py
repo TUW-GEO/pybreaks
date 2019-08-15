@@ -12,8 +12,8 @@ from pybreaks.adjust_linear_model_pair_fitting import RegressPairFit, PairRegres
 from datetime import datetime, timedelta
 from pybreaks.utils import dt_freq
 import numpy as np
+import matplotlib.pyplot as plt
 from pprint import pprint
-
 
 class Test_lmp_realdata_model_m(unittest.TestCase):
 
@@ -41,10 +41,28 @@ class Test_lmp_realdata_model_m(unittest.TestCase):
         cls.lmp = lmp
 
     def setUp(self):
-        pass
+        (res, freq) = dt_freq(self.lmp.df_original.index)
+        assert (res, freq) == (1., 'D')
+
+        self.values_to_adjust = self.ts_full.loc[
+                           datetime(2000, 1, 1):self.lmp.breaktime, 'can']
+        # correction from core has only impact if values to adjust are not the same
+        # as used to create the first model
+        self.can_adjusted = self.lmp.adjust(
+            self.values_to_adjust, corrections_from_core=True, resample_corrections=True,
+            interpolation_method='linear', values_to_adjust_freq='D')  # interpolation from M to D
+
+        self.can_adjusted_noresample = self.lmp.adjust(
+            self.values_to_adjust, corrections_from_core=True, resample_corrections=False,
+            interpolation_method='linear', values_to_adjust_freq='D')
 
     def tearDown(self):
-        pass
+        plt.close('all')
+
+    def test_plots(self):
+        fig = self.lmp.plot_models()
+        fig = self.lmp.plot_stats_ts(self.lmp.df_original, kind='line', stats=True)
+        fig = self.lmp.plot_adjustments()
 
     def test_correct_resample_interpolate(self):
         """
@@ -52,24 +70,13 @@ class Test_lmp_realdata_model_m(unittest.TestCase):
         Corrections are derived for monthly resampled values and then interpolated
         to the target daily resolution of the values to adjust.
         """
-        (res, freq) = dt_freq(self.lmp.df_original.index)
-        assert (res, freq) == (1., 'D')
         (res, freq) = dt_freq(self.lmp.df_adjust.index)
         assert (res, freq) == (1., 'M')
 
-        values_to_adjust = self.ts_full.loc[
-                           datetime(2000, 1, 1):self.lmp.breaktime, 'can']
-        # correction from core has only impact if values to adjust are not the same
-        # as used to create the first model
-        can_adjusted = self.lmp.adjust(
-            values_to_adjust, corrections_from_core=True, resample_corrections=True,
-            interpolation_method='linear', values_to_adjust_freq='D')  # interpolation from M to D
-
-        assert can_adjusted.index.size == values_to_adjust.index.size
+        assert self.can_adjusted.index.size == self.values_to_adjust.index.size
 
         corrections_interpolated = self.lmp.adjust_obj.adjustments  # interpolated M to D
         assert corrections_interpolated.index.size == 366.
-        plot_corrections = self.lmp.plot_adjustments()
 
         m0 = self.lmp.get_model_params(0)
         m1 = self.lmp.get_model_params(1)
@@ -81,23 +88,18 @@ class Test_lmp_realdata_model_m(unittest.TestCase):
 
     def test_correct_direct(self):
         # do not resample for the models
-        (res, freq) = dt_freq(self.lmp.df_original.index)
-        assert (res, freq) == (1., 'D')
         (res, freq) = dt_freq(self.lmp.df_adjust.index)
         assert (res, freq) == (1., 'M')
 
         values_to_adjust = self.ts_full.loc[
                            datetime(2000, 1, 1):self.lmp.breaktime, 'can']
 
-        can_adjusted = self.lmp.adjust(
-            values_to_adjust, corrections_from_core=True, resample_corrections=False,
-            interpolation_method='linear', values_to_adjust_freq='D')
 
-        assert can_adjusted.index.size == values_to_adjust.index.size
+
+        assert self.can_adjusted_noresample.index.size == values_to_adjust.index.size
 
         corrections_interpolated = self.lmp.adjust_obj.adjustments  # D, not interpolated
         assert corrections_interpolated.index.size == 366.
-        plot_corrections = self.lmp.plot_adjustments()
 
         m0 = self.lmp.get_model_params(0)  # models stay the same as for the previous test
         m1 = self.lmp.get_model_params(1)
@@ -134,10 +136,29 @@ class Test_lmp_realdata_model_d(unittest.TestCase):
         cls.lmp = lmp
 
     def setUp(self):
-        pass
+        (res, freq) = dt_freq(self.lmp.df_original.index)
+        assert (res, freq) == (1., 'D')
+
+        self.values_to_adjust = self.ts_full.loc[
+                           datetime(2000, 1, 1):self.lmp.breaktime, 'can']
+        # correction from core has only impact if values to adjust are not the same
+        # as used to create the first model
+        self.can_adjusted = self.lmp.adjust(
+            self.values_to_adjust, corrections_from_core=True, resample_corrections=True,
+            interpolation_method='linear', values_to_adjust_freq='D')  # interpolation from M to D
+
+        self.can_adjusted_noresample = self.lmp.adjust(
+            self.values_to_adjust, corrections_from_core=True, resample_corrections=False,
+            interpolation_method='linear', values_to_adjust_freq='D')
 
     def tearDown(self):
-        pass
+        plt.close('all')
+
+    def test_plots(self):
+        fig = self.lmp.plot_models()
+        fig = self.lmp.plot_stats_ts(self.lmp.df_original, kind='line', stats=True)
+        fig = self.lmp.plot_adjustments()
+
 
     def test_correct_resample_interpolate(self):
         """
@@ -146,25 +167,13 @@ class Test_lmp_realdata_model_d(unittest.TestCase):
         to the target daily resolution of the values to adjust.
         """
 
-        (res, freq) = dt_freq(self.lmp.df_original.index)
-        assert (res, freq) == (1., 'D')
         (res, freq) = dt_freq(self.lmp.df_adjust.index)
         assert (res, freq) == (1., 'D')
 
-        values_to_adjust = self.ts_full.loc[
-                           datetime(2000, 1, 1):self.lmp.breaktime, 'can']
-        # resample for the corrections.
-        # correction from core has only impact if values to adjust are not the same
-        # as used to create the first model
-        can_adjusted = self.lmp.adjust(
-            values_to_adjust, corrections_from_core=True, resample_corrections=True,
-            interpolation_method='linear', values_to_adjust_freq='D')  # interpolation from M to D
-
-        assert can_adjusted.index.size == values_to_adjust.index.size
+        assert self.can_adjusted.index.size == self.values_to_adjust.index.size
 
         corrections_interpolated = self.lmp.adjust_obj.adjustments  # interpolated M to D
         assert corrections_interpolated.index.size == 366.
-        plot_corrections = self.lmp.plot_adjustments()
 
         m0 = self.lmp.get_model_params(0)
         m1 = self.lmp.get_model_params(1)
@@ -176,23 +185,13 @@ class Test_lmp_realdata_model_d(unittest.TestCase):
 
     def test_correct_direct(self):
         # do not resample for the models
-        (res, freq) = dt_freq(self.lmp.df_original.index)
-        assert (res, freq) == (1., 'D')
         (res, freq) = dt_freq(self.lmp.df_adjust.index)
         assert (res, freq) == (1., 'D')
 
-        values_to_adjust = self.ts_full.loc[
-                           datetime(2000, 1, 1):self.lmp.breaktime, 'can']
-
-        can_adjusted = self.lmp.adjust(
-            values_to_adjust, corrections_from_core=True, resample_corrections=False,
-            interpolation_method='linear', values_to_adjust_freq='D')
-
-        assert can_adjusted.index.size == values_to_adjust.index.size
+        assert self.can_adjusted_noresample.index.size == self.values_to_adjust.index.size
 
         corrections_interpolated = self.lmp.adjust_obj.adjustments  # D, not interpolated
         assert corrections_interpolated.index.size == 366.
-        plot_corrections = self.lmp.plot_adjustments()
 
         m0 = self.lmp.get_model_params(0)  # models stay the same as for the previous test
         m1 = self.lmp.get_model_params(1)
@@ -229,36 +228,51 @@ class Test_lmp_synthetic_model_d(unittest.TestCase):
         cls.lmp = lmp
 
     def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
-
-    def test_correct_resample_interpolate(self):
         (res, freq) = dt_freq(self.lmp.df_original.index)
         assert (res, freq) == (1., 'D')
-        (res, freq) = dt_freq(self.lmp.df_adjust.index)
-        assert (res, freq) == (1., 'D')
 
-        values_to_adjust = self.ts_full.loc[:self.lmp.breaktime, 'can']
-        # resample for the corrections.
+        self.values_to_adjust = self.ts_full.loc[
+                           datetime(2000, 1, 1):self.lmp.breaktime, 'can']
         # correction from core has only impact if values to adjust are not the same
         # as used to create the first model
-        can_adjusted = self.lmp.adjust(
-            values_to_adjust, corrections_from_core=True, resample_corrections=True,
+
+        self.can_adjusted = self.lmp.adjust(
+            self.values_to_adjust, corrections_from_core=True, resample_corrections=True,
             interpolation_method='linear', values_to_adjust_freq='D')  # interpolation from M to D
 
-        assert can_adjusted.index.size == values_to_adjust.index.size
+        self.can_adjusted_noresample = self.lmp.adjust(
+            self.values_to_adjust, corrections_from_core=True, resample_corrections=False,
+            interpolation_method='linear', values_to_adjust_freq='D')
+
+        self.can_adjusted_direct = self.lmp.adjust(
+            self.values_to_adjust, corrections_from_core=True, resample_corrections=False,
+            interpolation_method='linear', values_to_adjust_freq='D')
+
+        self.can_adjusted_nocore = self.lmp.adjust(
+            self.values_to_adjust, corrections_from_core=False, resample_corrections=False,
+            interpolation_method='linear', values_to_adjust_freq='D')
+
+    def tearDown(self):
+        plt.close('all')
+
+    def test_plots(self):
+        fig = self.lmp.plot_models()
+        fig = self.lmp.plot_stats_ts(self.lmp.df_original, kind='line', stats=True)
+        fig = self.lmp.plot_adjustments()
+
+    def test_correct_resample_interpolate(self):
+        (res, freq) = dt_freq(self.lmp.df_adjust.index)
+        assert (res, freq) == (1., 'D')
+        assert self.can_adjusted.index.size == self.values_to_adjust.index.size
 
         # candidate before correction
-        np.testing.assert_equal(np.unique(values_to_adjust.values), np.array([10.,11.]))
+        np.testing.assert_equal(np.unique(self.values_to_adjust.values), np.array([10.,11.]))
         # candidate after correction
-        np.testing.assert_equal(np.unique(can_adjusted.values), np.array([50.,51.]))
+        np.testing.assert_equal(np.unique(self.can_adjusted.values), np.array([50.,51.]))
 
         corrections_interpolated = self.lmp.adjust_obj.adjustments  # interpolated M to D
-        assert corrections_interpolated.index.size == 366.
+        assert corrections_interpolated.index.size == self.values_to_adjust.index.size
         assert all(corrections_interpolated == 40.) # 50-40 resp. 51-11
-        plot_corrections = self.lmp.plot_adjustments()
 
         m0 = self.lmp.get_model_params(0)
         m1 = self.lmp.get_model_params(1)
@@ -270,16 +284,8 @@ class Test_lmp_synthetic_model_d(unittest.TestCase):
 
         # also get corrections from interpolated M values - must be same for the
         # synthetic case.
-        can_adjusted_direct = self.lmp.adjust(
-            values_to_adjust, corrections_from_core=True, resample_corrections=False,
-            interpolation_method='linear', values_to_adjust_freq='D')
-        assert np.alltrue(np.equal(can_adjusted_direct.values, can_adjusted.values))
-
-
-        can_adjusted_nocore = self.lmp.adjust(
-            values_to_adjust, corrections_from_core=False, resample_corrections=False,
-            interpolation_method='linear', values_to_adjust_freq='D')
-        assert np.alltrue(np.equal(can_adjusted_nocore.values, can_adjusted.values))
+        assert np.alltrue(np.equal(self.can_adjusted_direct.values, self.can_adjusted.values))
+        assert np.alltrue(np.equal(self.can_adjusted_nocore.values, self.can_adjusted.values))
 
 
 if __name__ == '__main__':
