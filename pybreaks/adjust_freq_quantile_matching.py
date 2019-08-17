@@ -263,11 +263,11 @@ class QuantileCatMatch(TsRelBreakBase):
                 ref = self.data_cf1_ref.copy(True)  # type: pd.DataFrame
 
             # before break
-            ax.plot(can['can'], can.index, color='red',
+            ax.plot(can['can'], can.index.values, color='red',
                     label='%s %s' % ('CAN', hsp))
 
             # after break
-            ax.plot(ref['ref'], ref.index, color='black',
+            ax.plot(ref['ref'], ref.index.values, color='black',
                     label='%s %s (not used)' % ('REF', hsp))
 
             # h = max(max(can['can']), max(ref['ref']))
@@ -1011,7 +1011,7 @@ class QuantileCatMatchAdjust(object):
 
         interpol_diff = self.df_cf['adj']
         # interpolation, if already done
-        ax.plot(interpol_diff.index, interpol_diff.values, linestyle='--',
+        ax.plot(interpol_diff.index.values, interpol_diff.values, linestyle='--',
                 color='red', label='cubic spline')
         return ax
 

@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
-
+"""
+Python 2 implementation of Lmoments CDF fitting. Needs lmoments (not lmoments3)
+package installed.
+"""
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats
 from statsmodels.distributions.empirical_distribution import ECDF
 from functools import partial
-import pybreaks.lmoments as lm
+import lmoments as lm
+import warnings
+warnings.warn('lmoments2 is deprecated, use lmoments3 instead', DeprecationWarning)
 
 class FitCDF2(object):
     '''

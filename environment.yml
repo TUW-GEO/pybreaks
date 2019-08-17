@@ -17,5 +17,4 @@ dependencies:
   - seaborn
   - smecv_grid
   - pytesmo
-
-
+  - git+git://github.com/OpenHydrology/lmoments3.git@develop

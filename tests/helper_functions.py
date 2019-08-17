@@ -81,3 +81,30 @@ def create_artificial_test_data(type):
         df = None
 
     return df,  breaktime, timeframe
+
+def compare_metrics(group_stats, group_metrics, metrics_change):
+    # some group metrics
+    should = group_stats['mean_CAN_group0'] - group_stats['mean_REF_group0']
+    np.testing.assert_almost_equal(group_metrics['CAN_REF_mean_Diff_group0'], should)
+    should = group_stats['median_CAN_group0'] - group_stats['median_REF_group0']
+    np.testing.assert_almost_equal(group_metrics['CAN_REF_median_Diff_group0'], should)
+    should = group_stats['median_CAN_group0'] - group_stats['median_REF_group0']
+    np.testing.assert_almost_equal(group_metrics['CAN_REF_median_Diff_group0'], should)
+    should = group_stats['median_CAN_FRAME'] - group_stats['median_REF_FRAME']
+    np.testing.assert_almost_equal(group_metrics['CAN_REF_median_Diff_FRAME'], should)
+    should = group_stats['iqr_CAN_group0'] / group_stats['iqr_REF_group0']
+    np.testing.assert_almost_equal(group_metrics['CAN_REF_iqr_Ratio_group0'], should)
+    should = group_stats['var_CAN_FRAME'] / group_stats['var_REF_FRAME']
+    np.testing.assert_almost_equal(group_metrics['CAN_REF_var_Ratio_FRAME'], should)
+
+    # some changes in metrics
+    assert list(metrics_change.keys()) == ['group0_group1']
+    should = np.abs(group_metrics['CAN_REF_PearsonR_group0'] - group_metrics['CAN_REF_PearsonR_group1'])
+    np.testing.assert_almost_equal(metrics_change['group0_group1']['CAN_REF_AbsDiff_PearsonR'], should)
+    should = np.abs(group_metrics['CAN_REF_SpearmanR_group0'] - group_metrics['CAN_REF_SpearmanR_group1'])
+    np.testing.assert_almost_equal(metrics_change['group0_group1']['CAN_REF_AbsDiff_SpearmanR'], should)
+    should = np.abs(group_metrics['CAN_REF_var_Ratio_group0'] - group_metrics['CAN_REF_var_Ratio_group1'])
+    np.testing.assert_almost_equal(metrics_change['group0_group1']['CAN_REF_AbsDiff_var_Ratio'], should)
+    should = np.abs(group_metrics['CAN_REF_median_Diff_group0'] - group_metrics['CAN_REF_median_Diff_group1'])
+    np.testing.assert_almost_equal(metrics_change['group0_group1']['CAN_REF_AbsDiff_median_Diff'], should)
+    return True

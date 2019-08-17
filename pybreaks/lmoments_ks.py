@@ -5,7 +5,7 @@ import numpy as np
 from scipy import stats
 from statsmodels.distributions.empirical_distribution import ECDF
 from functools import partial
-from pybreaks.lmoments3 import distr
+from lmoments3 import distr
 
 '''
 Module that finds the best fitting theoretical CDF of a set of implemented 

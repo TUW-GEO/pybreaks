@@ -124,14 +124,14 @@ class TsRelMultiBreak(TsRelBreakBase):
         if adjcheck_kwargs is not None:
             self.break_adjust_kwargs.update(adjcheck_kwargs)
 
-        # ----------------------------------------------------------------------
-        # -------BREAKTIME STORING ---------------------------------------------
+        # ---------------------------------------------------------------------
+        # -------BREAKTIME STORING --------------------------------------------
         # Contain breaktimes that have no break or where break was adjusted
         self.nobreak_original = []
         self.nobreak_adjusted = []
         self.break_adjusted = []
-        # ----------------------------------------------------------------------
-        # -------RESULTS STORING -------------------------------------------------
+        # ---------------------------------------------------------------------
+        # -------RESULTS STORING ----------------------------------------------
         # Contains results for testing and adjusting all the breaktimes and
         # statistics before/after the break time
         data_template = {breaktime: None for breaktime in breaktimes}
@@ -143,29 +143,26 @@ class TsRelMultiBreak(TsRelBreakBase):
             data_template.copy(), data_template.copy(), data_template.copy()
 
         self.checkstats = data_template
-        # ----------------------------------------------------------------------
-        # -------FIGURE STORING ------------------------------------------------
+        # ---------------------------------------------------------------------
+        # -------FIGURE STORING -----------------------------------------------
         self.frame_ts_figure = frame_ts_figure
         self.model_figures = create_model_plots
         self.frame_tsstats_plots = frame_tsstats_plots
-
         if self.frame_ts_figure:
             # single figure with frame ts for each break time
             self.frame_ts_figure = plt.figure(figsize=(25, 15))
         else:
             self.frame_ts_figure = None
-
         if self.model_figures:
             self.model_figures = {}
         else:
             self.model_figures = None
-
         if self.frame_tsstats_plots:
             self.tsstats_figures = {}
         else:
             self.tsstats_figures = None
-        # ----------------------------------------------------------------------
-        # ----------------------------------------------------------------------
+        # ---------------------------------------------------------------------
+        # ---------------------------------------------------------------------
 
         self.base_breaktime = base_breaktime
         self.adjust_within = adjust_within
@@ -438,7 +435,7 @@ class TsRelMultiBreak(TsRelBreakBase):
 
         return timeframe
 
-    def plot_adjustment_ts_full(self, save_path=None, gpi=None, resample='D',
+    def plot_adjustment_ts_full(self, save_path=None, prefix=None, resample='D',
                                 ax=None, legend=True):
         """
         Create a plot of candidate, adjusted candidate and reference time series
@@ -447,17 +444,17 @@ class TsRelMultiBreak(TsRelBreakBase):
 
         Parameters
         -------
-        save_path : str
+        save_path : str, optional (default: None)
             Path where the image is stored
-        gpi: int
-            Identifier for the location (for file name only)
-        resample : str
+        prefix: str, optional (default: None)
+            Prefix for the name of the plot file to create.
+        resample : str, optional (default: 'D')
             Resamples the time series to the given temporal resolution, does
             not influence the statistics, only visual
-        ax : plt.axes
+        ax : plt.axes, optional (default: None)
             Axes object, if this is passed the plot is a new subplot for
             the passed ax.
-        legend : bool
+        legend : bool, optional (default: True)
             Set True to plot the legend for the current plot
         """
 
@@ -517,7 +514,7 @@ class TsRelMultiBreak(TsRelBreakBase):
         if save_path:
             if not os.path.isdir(save_path):
                 os.mkdir(save_path)
-            gpi_str = str(gpi) + '_' if gpi else ''
+            gpi_str = str(prefix) + '_' if prefix else ''
             filename = '%sTS_adjustment_full_%s.png' % (gpi_str, resample)
 
             fig_full_ts.savefig(os.path.join(save_path, filename))
@@ -528,16 +525,16 @@ class TsRelMultiBreak(TsRelBreakBase):
             else:
                 return fig_full_ts
 
-    def plot_frame_ts_figure(self, save_path=None, gpi=None):
+    def plot_frame_ts_figure(self, save_path=None, prefix=None):
         """
         Show the frame figure plot if it was created
 
         Parameters
         -------
-        save_path : str
+        save_path : str, optional (default: None)
             Path where the image is created.
-        gpi : int
-            Identifier of the location (only for file name)
+        prefix : str, optional (default: None)
+            Prefix for the name of the plot file to create.
         """
         if save_path and not os.path.isdir(save_path):
             os.mkdir(save_path)
@@ -550,14 +547,14 @@ class TsRelMultiBreak(TsRelBreakBase):
         if save_path:
             if not os.path.isdir(save_path):
                 os.mkdir(save_path)
-            gpi_str = str(gpi) + '_' if gpi else ''
+            gpi_str = str(prefix) + '_' if prefix else ''
             filename = '%sTS_adjustment_frames.png' % gpi_str
             self.frame_ts_figure.savefig(os.path.join(save_path, filename))
             plt.close(self.frame_ts_figure)
         else:
             self.frame_ts_figure.show()
 
-    def plot_models_figures(self, save_path=None, gpi=None):
+    def plot_models_figures(self, save_path=None, prefix=None):
         """
         Saves the linear model plots collections to file or shows them
 
@@ -565,8 +562,8 @@ class TsRelMultiBreak(TsRelBreakBase):
         ----------
         save_path : str
             Path where the image is created.
-        gpi : int
-            Identifier of the location (only for file name)
+        prefix : str, optional (default: None)
+            Prefix for the name of the plot file to create.
 
         Returns
         ----------
@@ -584,23 +581,23 @@ class TsRelMultiBreak(TsRelBreakBase):
             if not os.path.isdir(save_path):
                 os.mkdir(save_path)
             for breaktime, figure in self.model_figures.items():
-                gpi_st = str(gpi) + '_' if gpi else ''
+                gpi_st = str(prefix) + '_' if prefix else ''
                 filename = '%s%s_models.png' % (gpi_st, str(breaktime.date()))
                 plt.tight_layout()
                 figure.savefig(os.path.join(save_path, filename))
         else:
             return self.model_figures
 
-    def plot_tsstats_figures(self, save_path=None, gpi=None):
+    def plot_tsstats_figures(self, save_path=None, prefix=None):
         """
         Saves the time series stats plots to file or shows them
 
         Parameters
         ----------
-        save_path : str
+        save_path : str, optional (default: None)
             Path where the image is created.
-        gpi : int
-            Identifier of the location (only for file name)
+        prefix : str, optional (default: None)
+            Prefix for the name of the plot file to create.
         """
         if save_path and not os.path.isdir(save_path):
             os.mkdir(save_path)
@@ -612,7 +609,7 @@ class TsRelMultiBreak(TsRelBreakBase):
             if not os.path.isdir(save_path):
                 os.mkdir(save_path)
             for breaktime, figure in self.tsstats_figures.items():
-                gpi_str = str(gpi) + '_' if gpi else ''
+                gpi_str = str(prefix) + '_' if prefix else ''
                 filename = '%s%s_tsstats_frames.png' % (gpi_str, str(breaktime.date()))
                 figure.savefig(os.path.join(save_path, filename))
                 plt.close(figure)
@@ -971,8 +968,9 @@ class TsRelMultiBreak(TsRelBreakBase):
 
         Parameters
         ----------
-        breaktime : datetime
-            The break time for which results are returned
+        breaktime : datetime, optional (default: None)
+            The break time for which results are returned. If None is passed,
+            all are returned.
 
         Returns
         -------
@@ -1153,11 +1151,11 @@ def usecase_hom():
     else:
         shutil.rmtree(plotpath)
 
-    ds.plot_frame_ts_figure(save_path=plotpath, gpi=gpi)
-    ds.plot_models_figures(save_path=plotpath, gpi=gpi)
-    ds.plot_adjustment_ts_full(save_path=plotpath, gpi=gpi, resample='M')
-    ds.plot_adjustment_ts_full(save_path=plotpath, gpi=gpi)
-    ds.plot_tsstats_figures(save_path=plotpath, gpi=gpi)
+    ds.plot_frame_ts_figure(save_path=plotpath, prefix=str(gpi))
+    ds.plot_models_figures(save_path=plotpath, prefix=str(gpi))
+    ds.plot_adjustment_ts_full(save_path=plotpath, prefix=str(gpi), resample='M')
+    ds.plot_adjustment_ts_full(save_path=plotpath, prefix=str(gpi))
+    ds.plot_tsstats_figures(save_path=plotpath, prefix=str(gpi))
 
     ts_full[ds.adjusted_col_name] = adjusted
 
@@ -1229,11 +1227,11 @@ def usecase_lmp():
     else:
         shutil.rmtree(plotpath)
 
-    ds.plot_frame_ts_figure(save_path=plotpath, gpi=gpi)
-    ds.plot_models_figures(save_path=plotpath, gpi=gpi)
-    ds.plot_adjustment_ts_full(save_path=plotpath, gpi=gpi, resample='M')
-    ds.plot_adjustment_ts_full(save_path=plotpath, gpi=gpi)
-    ds.plot_tsstats_figures(save_path=plotpath, gpi=gpi)
+    ds.plot_frame_ts_figure(save_path=plotpath, prefix=str(gpi))
+    ds.plot_models_figures(save_path=plotpath, prefix=str(gpi))
+    ds.plot_adjustment_ts_full(save_path=plotpath, prefix=str(gpi), resample='M')
+    ds.plot_adjustment_ts_full(save_path=plotpath, prefix=str(gpi))
+    ds.plot_tsstats_figures(save_path=plotpath, prefix=str(gpi))
 
     ts_full[ds.adjusted_col_name] = adjusted
 

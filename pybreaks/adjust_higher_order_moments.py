@@ -11,12 +11,7 @@ from scipy.interpolate import interp1d
 import statsmodels.api as sm
 from scipy.stats import ttest_rel, pearsonr
 import os
-
-import sys
-if sys.version_info[0] > 2:
-    from pybreaks.lmoments_ks import FitCDF
-else:
-    from pybreaks.lmoments_ks_py2 import FitCDF2 as FitCDF
+from pybreaks.lmoments_ks import FitCDF
 
 '''
 Quanitify differences in 2 parts of a time series using the Higher Order Moments
