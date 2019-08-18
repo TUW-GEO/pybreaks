@@ -19,6 +19,7 @@ on the break time and for bias correction between candidate and reference.
 
 # TODO:
 #   (+) Make the plot_stats_ts function return nicer results
+#   (o) Add properties, getters, setters
 #----------
 # NOTES:
 #   - Reference CDF scaling uses the same percentiles always, give option to select?
@@ -106,7 +107,6 @@ class TsRelBreakBase(object):
             style = ['r-', 'k-']
 
         return adjusted, style
-
 
     def _make_dataframe(self, candidate, reference, dropna=True):
         """
@@ -196,16 +196,16 @@ class TsRelBreakBase(object):
         -------
         frame : DataFrame
             The DataFrame with the candidate and reference data
-        method : str
+        method : str, optional (default: 'linreg')
             Method for bias correction as described in pytesmo
-        group : int or None
+        group : int or None, optional (default: None)
             0 or 1, if a group is selected, bias is calculated only for values
             of the group and applied to the whole frame, if None is selected,
             bias is calculated from and applied to the full frame.
 
         Returns
         -------
-        df_reference : DataFrame
+        df_reference : pd.DataFrame
             The bias corrected input data frame reference column
         """
 
@@ -273,7 +273,7 @@ class TsRelBreakBase(object):
         """
         if can_name:
             try:
-                # todo: this is the actual candidate name in some child classes
+                # todo: this is the actual candidate name in some child classes, not nice...
                 df = df.rename(columns={self.original_candidate_col_name: can_name})
             except AttributeError:
                 df = df.rename(columns={self.candidate_col_name: can_name})
@@ -296,12 +296,13 @@ class TsRelBreakBase(object):
         Parameters
         ----------
         group_no : int or None
-            Group index (0 = before break time, 1 = after break time)
-        frame : DataFrame
+            Group index (0 = before break time, 1 = after break time) or None
+            for all values.
+        frame : pd.DataFrame
             The data frame where the group data is taken from
         columns : list or 'all', optional (default: None)
             Name of the columns in the main_verification.py data frame. If this None, only the
-            indices are returned
+            indices are returned. When 'all' is passed, all columns are returned.
         extended : bool, optional (default: False)
             Force the inclusion of the index before/after the break time.
 
@@ -550,6 +551,8 @@ class TsRelBreakBase(object):
             ax.axvline(self.breaktime, linestyle='solid', color='red', lw=2)
         elif self.breaktime:
             ax.axvline(self.breaktime, linestyle=linestyle, color=color, lw=2)
+        else:
+            pass
 
         if save_path:
             fig_frame_ts.savefig(save_path)
@@ -568,12 +571,14 @@ class TsRelBreakBase(object):
         frame: pd.DataFrame
             The dataframe that is plotted
             eg self.df_original, or self.df_frame etc.
-        kind : str, optional (default: box)
+        kind : str, optional (default: 'box')
             Select 'box' or 'line 'to plots stats as line plots or box plots
         save_path : str, optional (default: None)
             Path to file where the image is stored
         title : str, optional (default: None)
             Title for the plot, if None is passed, it gets no title.
+        stats: bool, optional (default: False)
+            If True, adds stats in a text box to the empty panels of the figure.
 
         Returns
         -------
@@ -711,50 +716,5 @@ class TsRelBreakBase(object):
 
         return fig_frame_ts
 
-def usecase_base():
-    # todo: implement as tests
-    ''' Test all functions with an exaple GPI'''
-    from pybreaks.timeframes import TsTimeFrames
-    from data_read_write.otherfunctions import smart_import
-    from pprint import pprint
-
-    GPI = 315220
-
-    CANNAME = 'CCI_44_COMBINED'
-    REFNAME = 'MERRA2'
-
-    TIMES = CCITimes('CCI_44_COMBINED', min_set_days=None,
-                     skip_breaktimes=[1, 3]).get_times(gpi=GPI)
-    BREAKTIMES, TIMEFRAMES = TIMES['breaktimes'], TIMES['timeframes']
-
-    TS_FULL, PLOTPATH = smart_import(GPI, CANNAME, REFNAME)
-
-    for TIMEFRAME, BREAKTIME in zip(TIMEFRAMES, BREAKTIMES):
-        TS = TS_FULL[TIMEFRAME[0]:TIMEFRAME[1]]
-
-        TS = TS.resample('M').mean()
-
-        DS = TsRelBreakBase(candidate=TS[CANNAME], reference=TS[REFNAME], breaktime=BREAKTIME,
-                            bias_corr_method='cdf_match', dropna=False)
-        # object variables
-        pprint(DS.df_original)
-        pprint(DS.breaktime)
-        pprint(DS.reference_col_name)
-        pprint(DS.candidate_col_name)
-        pprint(DS.bias_corr_method)
-
-        G0_DATA = DS.get_group_data(group_no=0, frame=DS.df_original, columns='all')
-        Q = DS.calc_diff(DS.df_original)
-        # object functions
-        VAL_GROUP_STATS, VERTICAL_METRICS, HORIZONTAL_ERRORS = \
-            DS.get_validation_stats(DS.df_original, comp_meth='Diff', can_name='CAN',
-                                    ref_name='REF', adj_name=None, as_dict=False,
-                                    digits=5)
-
-        DS.plot_stats_ts(DS.df_original, kind='box')
-
-        DS.plot_ts(DS.df_original)
-
-
 if __name__ == '__main__':
-    usecase_base()
+    pass

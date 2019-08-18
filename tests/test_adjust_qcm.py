@@ -27,14 +27,14 @@ class Test_qcm_realdata(unittest.TestCase):
         start = datetime(2010, 1, 15)
         ts_frame = ts.loc[start:, :]
 
-        hom_kwargs = dict(n_quantiles=4, first_last='formula', fit='mean')
+        qcm_kwargs = dict(categories=4, first_last='formula', fit='mean')
 
         qcm = QuantileCatMatch(ts_frame['can'],
                                  ts_frame['ref'],
                                  breaktime,
                                  bias_corr_method='linreg',
                                  adjust_group=0,
-                                 **hom_kwargs)
+                                 **qcm_kwargs)
         cls.qcm = qcm
 
     def setUp(self):
@@ -96,14 +96,14 @@ class Test_qcm_synthetic(unittest.TestCase):
                            'reference': 'ref'}, inplace=True)
         cls.ts_full = ts  # this can be used to test if values to adjust are not same as for model
 
-        hom_kwargs = dict(n_quantiles=1, first_last='equal', fit='mean')
+        qcm_kwargs = dict(categories=1, first_last='equal', fit='mean')
 
         qcm = QuantileCatMatch(ts['can'],
                                ts['ref'],
                                breaktime,
                                bias_corr_method='linreg',
                                adjust_group=0,
-                               **hom_kwargs)
+                               **qcm_kwargs)
         cls.qcm = qcm
 
     def setUp(self):

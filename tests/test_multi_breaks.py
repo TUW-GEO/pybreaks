@@ -270,7 +270,7 @@ class Test_multibreak_adjust_qcm(unittest.TestCase):
                             ('test_check_min_data', 5),
                             ('test_check_spearR_sig', [0., 1.])])
 
-        adjmodel_kwargs = dict([('n_quantiles', 12),
+        adjmodel_kwargs = dict([('categories', 12),
                                 ('first_last', 'formula'),
                                 ('fit', 'mean')])
 
@@ -359,6 +359,71 @@ class Test_multibreak_adjust_qcm(unittest.TestCase):
         assert testresults_ifirst['h_MEAN'] == 1
         assert testresults_ilast['h_MEAN'] == 0
         assert testresults_ilast['h_VAR'] == testresults_ifirst['h_VAR']
+
+
+
+class Test_multibreak_test(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        ts = read_test_data(707393)
+        ts_full = ts.rename(columns={'CCI_44_COMBINED': 'candidate',
+                                     'MERRA2': 'reference'}).loc['2007-01-01':].copy(True)
+        ts_full['candidate_original'] = ts_full['candidate'] # keep original
+        # introduce some breaks to correct
+        cls.breaktimes = np.array([datetime(2012,7,1), datetime(2010,1,15)])
+        can_biased = ts_full.loc[:, 'candidate'].copy(True)
+        can_biased[cls.breaktimes[0]:] += 0.1 # first break
+        can_biased.loc[:cls.breaktimes[1]] -= 0.1 # second break
+        ts_full.loc[:, 'candidate'] = can_biased
+        ts_full['flags'] = 0. # all are good in the example
+
+        test_kwargs = dict([('test_resample', ('M', 0.3)),
+                            ('mean_test', 'wilkoxon'),
+                            ('var_test', 'scipy_fligner_killeen'),
+                            ('alpha', 0.01),
+                            ('test_check_min_data', 5),
+                            ('test_check_spearR_sig', [0., 1.])])
+
+        cls.ts_full = ts_full.copy(True)
+
+        cls.src = TsRelMultiBreak(candidate=cls.ts_full['candidate'],
+                                  reference=cls.ts_full['reference'],
+                                  breaktimes=cls.breaktimes,
+                                  adjustment_method=None,
+                                  candidate_flags=(cls.ts_full['flags'], [0]),
+                                  full_period_bias_corr_method='cdf_match',
+                                  sub_period_bias_corr_method='linreg',
+                                  base_breaktime=None,
+                                  HSP_init_breaktest=False,
+                                  models_from_hsp=False,
+                                  adjust_within='frames',
+                                  input_resolution='D',
+                                  test_kwargs=test_kwargs,
+                                  adjmodel_kwargs={},
+                                  adjcheck_kwargs={},
+                                  create_model_plots=False,
+                                  frame_ts_figure=False,
+                                  frame_tsstats_plots=False)
+
+        (res, freq) = dt_freq(cls.src.df_original.index)
+        assert (res, freq) == (1., 'D')
+        cls.src.test_all()
+        assert cls.src.candidate_has_changed() == False
+
+    def test_results(self):
+        testresults_ifirst, _, _, _, \
+        group_stats, group_metrics, metrics_change, checkstats = \
+            self.src.get_results(breaktime=datetime(2012,7,1))
+        assert testresults_ifirst['h_MEAN'] == 1
+        assert testresults_ifirst['h_VAR'] == 0
+        assert compare_metrics(group_stats, group_metrics, metrics_change)
+
+        testresults_ifirst, _, _, _, \
+        group_stats, group_metrics, metrics_change, checkstats = \
+            self.src.get_results(breaktime=datetime(2010,1,15))
+
+        assert testresults_ifirst['h_MEAN'] == 1
+        assert testresults_ifirst['h_VAR'] == 0
 
 if __name__ == '__main__':
     unittest.main()

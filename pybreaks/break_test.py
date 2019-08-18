@@ -539,28 +539,5 @@ class TsRelBreakTest(TsRelBreakBase):
 
 
 if __name__ == '__main__':
-    from cci_breaks.cci_timeframes import CCITimes
-    import getpass
-    from data_read_write.otherfunctions import smart_import
-
-    USER = getpass.getuser()
-
-    QDEGDATA = False
-    GPI = 654079
-    CANNAME = 'CCI'
-    REFNAME = 'REF'
-    ADJNAME = 'ADJ'
-
-    TIMES = CCITimes('CCI_41_COMBINED', min_set_days=None, skip_breaktimes=[1, 3]). \
-        get_times(gpi=GPI)
-    BREAKTIMES, TIMEFRAMES = TIMES['breaktimes'], TIMES['timeframes']
-
-    TS_FULL, PLOTPATH = smart_import(GPI, CANNAME, REFNAME)
-
-    for TIMEFRAME, BREAKTIME in zip(TIMEFRAMES, BREAKTIMES):
-        print(BREAKTIME)
-        TS = TS_FULL[TIMEFRAME[0]:TIMEFRAME[1]]
-        ds = TsRelBreakTest(TS[CANNAME], TS[REFNAME], BREAKTIME, test_check_spearR_sig=(0, 0.01),
-                            test_resample=('M', 0.3), bias_corr_method='linreg')
-        ISBREAK, BREAKTYPE, TESTRESULT, ERRORCODE = ds.run_tests()
+    pass
 

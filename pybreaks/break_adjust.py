@@ -431,7 +431,7 @@ class TsRelBreakAdjust(TsRelBreakBase):
             candidate.name, reference.name = 'CAN', 'REF'
 
             # try with decreasing n_quantiles, until the object could be created
-            while model_kwargs['n_quantiles'] >= 1:
+            while model_kwargs['categories'] >= 1:
                 try:
                     self.adjust_obj = \
                         QuantileCatMatch(candidate=candidate,
@@ -443,7 +443,7 @@ class TsRelBreakAdjust(TsRelBreakBase):
                     break  # escape object was created
                 except N_Quantile_Exception:
                     # reduce the number of quantile categories if it fails (until 1, where it must work)
-                    model_kwargs['n_quantiles'] -= 1
+                    model_kwargs['categories'] -= 1
 
         elif self.adjustment_method == 'HOM':
             candidate = self.df_frame.dropna()[ccn].copy(True)

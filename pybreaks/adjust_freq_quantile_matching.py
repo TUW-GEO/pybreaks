@@ -12,21 +12,21 @@ import warnings
 
 warnings.simplefilter('always', UserWarning)
 
-'''
+"""
 Module implements the quantile matching adjustment (Wang 2010, Vincent 2012) 
 for breaks in soil moisture observation time series.
+"""
 
-TODO #################################
-(-) add a function to both classes to plot the adjustments only, as done for the
-    other 2 correction classes.
-
-NOTES ################################
--
-'''
+# TODO:
+#   (-) add a function to both classes to plot the adjustments only, as done for the
+#       other 2 correction classes.
+#---------
+# NOTES:
+#   -
 
 class N_Quantile_Exception(ValueError):
     def __init__(self, *args, **kwargs):
-        ValueError.__init__(self, *args, **kwargs)
+        super(N_Quantile_Exception, self).__init__(*args, **kwargs)
 
 
 def _init_rank(indata, name='can', drop_dupes=False):
@@ -52,7 +52,7 @@ def _init_rank(indata, name='can', drop_dupes=False):
     data_cf : pd.DataFrame
         data sorted by CF (index), if chosen without duplicates
     """
-    data = indata.copy(True)  # type: pd.DataFrame
+    data = indata.copy(True)
 
     data = data.dropna()
 
@@ -96,7 +96,7 @@ class QuantileCatMatch(TsRelBreakBase):
     """
 
     def __init__(self, candidate, reference, breaktime,
-                 bias_corr_method='cdf_match', adjust_group=0, n_quantiles=4,
+                 bias_corr_method='cdf_match', adjust_group=0, categories=4,
                  first_last='formula', fit='mean'):
         '''
         Class that performs adjustment of candidate data before/after break
@@ -117,10 +117,10 @@ class QuantileCatMatch(TsRelBreakBase):
             Identifies the group (0=before break time, 1=after break time) that
             is being adjusted. By default the part before the break time is
             adjusted.
-        n_quantiles : int, optional
+        categories : int, optional
             Number of percentiles that are fitted (equal distribution)
             (0 and 100 are always considered) must be >=1.
-            Default is 4 quantile categories.
+            Default is 4 quartile categories.
         first_last : str, optional (default: 'formula')
             'formula', 'equal' or 'None'
             Select 'formula' to calc the boundary values after the formula or
@@ -139,44 +139,20 @@ class QuantileCatMatch(TsRelBreakBase):
         TsRelBreakBase.__init__(self, candidate, reference, breaktime,
                                 bias_corr_method, dropna=False)
 
-        self.n_quantiles = n_quantiles
 
         if first_last == 'None':
             first_last = None
         self.first_last = first_last
         self.fit = fit
 
-        self.percentile_edges = np.linspace(0, 100, self.n_quantiles + 1)  # type: np.array
-
-        percentile_middles = []
-        for p in np.linspace(0, 100, self.n_quantiles * 2 + 1)[1:-1]:
-            if p not in self.percentile_edges:
-                percentile_middles.append(p)
-        self.percentile_middles = np.array(percentile_middles)
+        self._n_quantiles = categories
+        self._init_percentiles()
 
         self.adjust_group, self.other_group = self._check_group_no(adjust_group)
 
         self.df_adjust = self.df_original.copy(True)
 
-        data0 = self.get_group_data(0, self.df_original,
-                                    [self.candidate_col_name, self.reference_col_name])
-
-        data1 = self.get_group_data(1, self.df_original,
-                                    [self.candidate_col_name, self.reference_col_name])
-
-        data0['D'] = data0['can'] - data0['ref']
-        data1['D'] = data1['can'] - data1['ref']
-
-        self.data0 = data0
-        self.data1 = data1
-
-        # based on CAN
-        data0, self.data_cf0_can = _init_rank(self.data0, 'can', drop_dupes=False)
-        data1, self.data_cf1_can = _init_rank(self.data1, 'can', drop_dupes=False)
-
-        # based on REF, not used, do this when needed (plotting)
-        self.data_cf0_ref = None
-        self.data_cf1_ref = None
+        self._init_group_data()
 
         mq_cand_0, mq_cand_1 = self.split_mq(self.data_cf0_can, self.data_cf1_can)
 
@@ -189,19 +165,51 @@ class QuantileCatMatch(TsRelBreakBase):
         self.adjusted_col_name = None
         self.adjust_obj = None
 
+    def _init_percentiles(self):
+        self._percentile_edges = np.linspace(0, 100, self.n_quantiles + 1)
+        percentile_middles = []
+        for p in np.linspace(0, 100, self.n_quantiles * 2 + 1)[1:-1]:
+            if p not in self.percentile_edges:
+                percentile_middles.append(p)
+        self._percentile_middles = np.array(percentile_middles)
+
+    def _init_group_data(self):
+        data0 = self.get_group_data(0, self.df_original,
+            [self.candidate_col_name, self.reference_col_name])
+        data1 = self.get_group_data(1, self.df_original,
+            [self.candidate_col_name, self.reference_col_name])
+        data0['D'] = data0['can'] - data0['ref']
+        data1['D'] = data1['can'] - data1['ref']
+        self.data0 = data0
+        self.data1 = data1
+        # based on CAN:
+        _, self.data_cf0_can = _init_rank(self.data0, 'can', drop_dupes=False)
+        _, self.data_cf1_can = _init_rank(self.data1, 'can', drop_dupes=False)
+        # based on REF, not used, do this when needed (plotting):
+        self.data_cf0_ref = None
+        self.data_cf1_ref = None
+
+    @property
+    def n_quantiles(self):
+        return self._n_quantiles
+
+    @property
+    def percentile_edges(self):
+        return self._percentile_edges
+
+    @property
+    def percentile_middles(self):
+        return self._percentile_middles
+
+
     def plot_cdf_compare(self, ax=None, raw_plot=False):
         """
-
         Parameters
         ----------
         axs : matplotlib.Axes.axs, optional (default: None)
             Axes put the plot into
         raw_plot : bool, optional (default: False)
             Create a plot without title and interface, labels and legend.
-
-        Returns
-        -------
-
         """
         if not ax:
             fig, ax = plt.subplots()
@@ -1015,74 +1023,5 @@ class QuantileCatMatchAdjust(object):
                 color='red', label='cubic spline')
         return ax
 
-def usecase():
-    from data_read_write.otherfunctions import smart_import
-    from datetime import datetime
-
-    gpi = 444772  # bad: 395790,402962
-    canname = 'CCI_44_COMBINED'
-    refname = 'MERRA2'
-
-    breaktime = datetime(2002, 6, 19)
-    timeframe = [datetime(1991, 1, 1), datetime(2007, 1, 1)]
-
-
-    ts_full, plotpath = smart_import(gpi, canname, refname)
-
-    ds = TsRelBreakBase(ts_full[canname], ts_full[refname], breaktime,
-                        bias_corr_method='cdf_match', dropna=False)
-
-    ts_full = ds.df_original[[canname, refname]].copy(True)
-
-    ts_full['original'] = ts_full[canname].copy(True)
-
-    ts_frame = ts_full[timeframe[0]:timeframe[1]].copy(True)
-
-    obj = QuantileCatMatch(
-        candidate=ts_frame[canname],
-        reference=ts_frame[refname],
-        breaktime=breaktime,
-        bias_corr_method='linreg',
-        adjust_group=0,
-        n_quantiles=4,
-        first_last='formula',
-        fit='mean')
-
-
-    values_to_adjust = ts_full[canname].loc[:breaktime]
-    can_adjusted = obj.adjust(values_to_adjust, interpolation_method='cubic')
-
-    obj.plot_pdf_compare()
-
-    obj.plot_cdf_compare()
-    obj.plot_models()
-    obj.plot_emp_dist_can_ref()
-    obj.plot_ts(obj.df_original)
-
-
-
-    can_unchanged = obj.get_group_data(obj.other_group, obj.df_original, (obj.candidate_col_name))
-    can_new = pd.concat([can_adjusted, can_unchanged], axis=0)
-
-    ref_new = obj.get_group_data(None, obj.df_original, (obj.reference_col_name))
-
-
-    nobj = QuantileCatMatch(
-        candidate=can_new,
-        reference=ref_new,
-        breaktime=breaktime,
-        bias_corr_method=None,
-        adjust_group=0,
-        n_quantiles=4,
-        first_last='formula',
-        fit='mean')
-
-    nobj.plot_pdf_compare()
-
-    nobj.plot_cdf_compare()
-    nobj.plot_models()
-    nobj.plot_emp_dist_can_ref()
-    nobj.plot_ts(obj.df_original)
-
 if __name__ == '__main__':
-    usecase()
+    pass

@@ -277,7 +277,7 @@ class Test_adjust_qcm(unittest.TestCase):
                            test_check_min_data=3, test_check_spearR_sig=(0, 0.05),
                            alpha=0.01)
 
-        adjmodel_kwargs = dict(n_quantiles=4, first_last='formula', fit='mean')
+        adjmodel_kwargs = dict(categories=4, first_last='formula', fit='mean')
 
         kwargs = dict(candidate_flags=None, timeframe=timeframe, bias_corr_method='cdf_match',
                  adjust_tf_only=False, adjust_group=0, input_resolution='D',
