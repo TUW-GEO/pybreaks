@@ -6,7 +6,7 @@ import numpy as np
 import calendar
 
 def count_M(dt, first_should, last_should):
-    '''
+    """
     Count the number of valid months instances (not nan) per month in the passed index,
     and how many there should be.
 
@@ -23,14 +23,15 @@ def count_M(dt, first_should, last_should):
 
     Returns
     -------
-
-    '''
+    df_count: pd.DataFrame
+        A data frame that contains the calculated statistics
+    """
     years, months = dt.year, dt.month
 
     if len(years) == 0 or len(months) == 0:
         return None
 
-    index_full = pd.PeriodIndex(start=first_should, end=last_should, freq='M')
+    index_full = pd.period_range(start=first_should, end=last_should, freq='M')
 
     max_month_counter, is_months_counter = {}, {}
     for month, indices_per_month in index_full.groupby(index_full.month).items():
@@ -57,7 +58,7 @@ def count_M(dt, first_should, last_should):
 
 
 def count_D(dt, first_should, last_should):
-    '''
+    """
     Count the number of days per month in the passed index, and how many there
     should be.
 
@@ -72,15 +73,16 @@ def count_D(dt, first_should, last_should):
 
     Returns
     -------
-
-    '''
+    df_count: pd.DataFrame
+        A data frame that contains the calculated statistics
+    """
 
     years, months, days = dt.year, dt.month, dt.day
 
     if len(years) == 0 or len(months) == 0:
         return None
 
-    index_full = pd.DatetimeIndex(start=first_should, end=last_should, freq='D')
+    index_full = pd.date_range(start=first_should, end=last_should, freq='D')
 
     max_days_counter, is_days_counter = {}, {}
     for month, indices_per_month in index_full.groupby(index_full.month).items():
@@ -241,7 +243,6 @@ def drop_months_data(df, drop_months):
 
 if __name__ == '__main__':
     import numpy as np
-    from breakadjustment.standalone_functions import conditional_temp_resample
 
 
     monthly= False

@@ -403,23 +403,4 @@ def dt_freq(dt, ignore_M=False):
         return min(sampled), highest_freq
 
 if __name__ == '__main__':
-    dt = pd.date_range('2000-01-01', '2010-12-31', freq='1H')
-    ds = pd.Series(index=dt, data=1)
-    dt=dt.drop(ds.index[[0,2,4]])
-    f, freq = dt_freq(dt)
-
-
-    # test resample
-    df = pd.DataFrame(index=[datetime(1991,8,5)], data={'can':[14.8], 'ref':[None]})
-    df_conditional_temp_resample(df, 'M', 0.0001)
-
-
-    # test crosscorr
-    x = pd.Series(index=pd.DatetimeIndex(start='2000-01-01', end='2000-12-31', freq='D'), data=range(366))
-    y = pd.Series(index=pd.DatetimeIndex(start='2000-01-01', end='2000-12-31', freq='D'), data=[1] * 366)
-
-    df = pd.concat([x,y], axis=1).rename(columns={0:'x', 1:'y'})
-    df['Q'] = df['x'] - df['y']
-    mask = filter_by_quantiles(df, 'Q', 0, 0.99)
-    lags = range(100)
-    cc_fct = pd.Series(index=lags, data=crosscorr(x,y,lags))
+    pass

@@ -5,15 +5,13 @@ import warnings
 from datetime import datetime
 
 class TsTimeFrames(object):
-    '''
+    """
     Module created time frames from passed break times and start / end dates
     Allows location dependent time frames from gpis
-    '''
+    """
     def __init__(self, start, end, breaktimes, grid=None, ignore_position=True,
                  skip_breaktimes=None, min_set_days=None, base_breaktime=None):
-        '''
-        Initialize the object
-
+        """
         Parameters
         ----------
         start: datetime
@@ -61,7 +59,7 @@ class TsTimeFrames(object):
             Whether the postional conditions of breaks times should be ignored or not
         grid : pygeogrids.BasicGrid
             Grid that is used for evaluation of conditions for location dependent break times
-        '''
+        """
 
         self.breaktimes = breaktimes
         self.ranges = [start.strftime('%Y-%m-%d') if isinstance(start, datetime) else start,
@@ -103,6 +101,8 @@ class TsTimeFrames(object):
             warnings.warn('Attention: Resorting will be performed AFTER'
                           ' reducing the break times!!')
 
+    def __len__(self):
+        return len(self.breaktimes)
 
 
     def _base_sort(self, times, base_breaktime):
@@ -137,11 +137,6 @@ class TsTimeFrames(object):
         # take all (sorted) break times before the base break time
         breaktimes_after_base = np.flipud(breaktimes[:base_breaktime + 1])
 
-        '''
-        if breaktimes_after_base[0] != times[base_period]:
-            raise Exception('Sorting changed the position of the base period, compared to the input break times '
-                            'to use a different base period, please insert breaktimes in sorted order')
-        '''
         return breaktimes_before_base, breaktimes_after_base
 
     def _filter_short_timeframes(self, days_min, breaktimes):
@@ -258,7 +253,8 @@ class TsTimeFrames(object):
          breaktimes : np.array
             The reduced break times
         '''
-        return [self.breaktimes[i] for i in range(len(self.breaktimes)) if i not in indices_to_ignore]
+        return np.array([self.breaktimes[i] for i in range(len(self.breaktimes))
+                if i not in indices_to_ignore])
 
     def filter_breaktimes(self, gpi):
         '''

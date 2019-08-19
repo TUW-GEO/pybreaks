@@ -907,7 +907,7 @@ class QuantileCatMatchAdjust(object):
         return cat_diffs[~cat_diffs.index.duplicated(keep='first')]
 
     def apply_adjustments(self, df_in, input_col_name, adjustments_col_name):
-        # Todo: Do something with the adjustments before applying them.
+        # Todo: Do something with the adjustments before applying them?
         # This must support some kind of upsampling, in cases where the temporal
         # resolution of the adjustments does not match the input data.
 

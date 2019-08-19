@@ -81,6 +81,12 @@ class HigherOrderMoments(TsRelBreakBase):
     Only together with the BreakTest class (as implemented in TsRelBreakAdjust)
     we can use this method to adjust breaks in a time series.
     """
+
+    # Properties
+    _ref_regress = None # Reference time period regression fit
+    _obs_regress = None # Other time period regression fit
+
+
     def __init__(self, candidate, reference, breaktime,
                  regress_resample=None, bias_corr_method='linreg',
                  filter=None, adjust_group=0, poly_orders=[1, 2],
@@ -131,12 +137,6 @@ class HigherOrderMoments(TsRelBreakBase):
             Class.
         """
 
-        '''Names:
-        # obs : the period that contains biased observations and reference
-        #       values to make homog. predictions
-        # ref : the period that contains reference observations that are used
-        #       to make the model for the predictions
-        '''
         TsRelBreakBase.__init__(self, candidate, reference, breaktime,
                                 bias_corr_method, dropna=True)
 
@@ -145,33 +145,14 @@ class HigherOrderMoments(TsRelBreakBase):
 
         self.adj_group, self.ref_group = self._check_group_no(adjust_group)
 
-        self.df_original = self.df_original.rename(columns={self.candidate_col_name: 'can',
-                                                            self.reference_col_name: 'ref'})
-        # find the model with the smallest median squared error from the passed
-        # ensemble of possible polynomials
+        self.df_original = self.df_original.rename(
+            columns={self.candidate_col_name: 'can', self.reference_col_name: 'ref'})
+
         self.regress_resample = regress_resample
-        if select_by == 'ttest':
-            self.ref_regress, best_p, ref_perf = self._best_model_ttest(group=self.ref_group,
-                                                                  poly_orders=poly_orders,
-                                                                  alpha=0.05)
-        elif select_by == 'R':
-            if poly_orders != [1,2]:
-                raise ValueError(poly_orders, 'Deciding by R needs poly_orders=[1,2]')
-            self.ref_regress, best_p, ref_perf = self._best_model_R(group=self.ref_group,
-                                                                    thresR=0.8,
-                                                                    thresP=0.05)
-        elif not select_by:
-            if isinstance(poly_orders, int):
-                poly_orders = [poly_orders]
-            if len(poly_orders) > 1:
-                raise ValueError(poly_orders, "Either specify the poly order or select a method for selection")
-            best_p = poly_orders[0]
-            self.ref_regress = self._calc_model(group=self.ref_group,
-                                                poly_order=best_p)
-        else:
-            raise ValueError(select_by, "Unknown method to detect the polynomial regression order.")
+
+        best_p = self._init_ref_regress(select_by, poly_orders)
         # this is optional
-        self.obs_regress = self._calc_model(group=self.adj_group, poly_order=best_p)
+        self._obs_regress = self._calc_model(group=self.adj_group, poly_order=best_p)
 
         # candidate data that was used for model generation
         self.obs = self.get_group_data(self.adj_group, self.df_original, 'all')
@@ -183,8 +164,8 @@ class HigherOrderMoments(TsRelBreakBase):
         self._cdf_can_obs = FitCDF(np.array(self.obs['can'].values, dtype=np.float64),
                                    self.cdf_types)
         # create predictions of the candidate with the reference using the model
-        self.obs['can_pred'] = self._make_predictions(regress=self.ref_regress,
-                                                      ds=self.obs['ref'])
+        self.obs['can_pred'] = self._init_make_predictions(
+            regress=self._ref_regress, ds=self.obs['ref'])
 
         self._cdf_can_pred = FitCDF(np.array(self.obs['can_pred'].values, dtype=np.float64),
                                     self.cdf_types)
@@ -193,7 +174,7 @@ class HigherOrderMoments(TsRelBreakBase):
 
         self.adjusted_col_name = None  # not yet adjusted
 
-    def _make_predictions(self, regress, ds):
+    def _init_make_predictions(self, regress, ds):
         """
         Predict the candidate for the adjust period using the reference for the
         adjust period and the regression model.
@@ -217,6 +198,35 @@ class HigherOrderMoments(TsRelBreakBase):
         df['pred'] = can_pred
 
         return can_pred
+
+    def _init_ref_regress(self, select_by, poly_orders):
+        if select_by == 'ttest':
+            # find the model with the smallest median squared error from the passed
+            # ensemble of possible polynomials if the mean error is significantly lower.
+            self._ref_regress, best_p, ref_perf = \
+                self._best_model_ttest(group=self.ref_group, poly_orders=poly_orders,
+                    alpha=0.05)
+        elif select_by == 'R':
+            # Use linear correlation to decide whether a linear or quadratic model
+            # fits better.
+            if poly_orders != [1,2]:
+                raise ValueError(poly_orders, 'Deciding by R needs poly_orders=[1,2]')
+            self._ref_regress, best_p, ref_perf = \
+                self._best_model_R(group=self.ref_group, thresR=0.8, thresP=0.05)
+        elif not select_by:
+            # Force using the passed regression order.
+            if isinstance(poly_orders, int):
+                poly_orders = [poly_orders]
+            if len(poly_orders) > 1:
+                raise ValueError(poly_orders,
+                    "Either specify the poly order or select a method for selection")
+            best_p = poly_orders[0]
+            self._ref_regress = self._calc_model(group=self.ref_group,
+                                                poly_order=best_p)
+        else:
+            raise ValueError(select_by, "Unknown method to detect the polynomial regression order.")
+
+        return best_p
 
     def _best_model_R(self, group, thresR=0.8, thresP=0.05):
         """
@@ -307,7 +317,7 @@ class HigherOrderMoments(TsRelBreakBase):
             if best_model_residuals is None:  # always accept if there's nothing to compare to
                 min_m = m
                 best_p = p
-                best_regress = regress  # ref_regress.model.copy()
+                best_regress = regress
                 best_model_residuals = residuals
             else:
                 # test if the mean of the residuals is really different
@@ -320,7 +330,7 @@ class HigherOrderMoments(TsRelBreakBase):
                         # significantly lower mean of residuals
                         min_m = m
                         best_p = p
-                        best_regress = regress  # ref_regress.model.copy()
+                        best_regress = regress
                         best_model_residuals = residuals
                     else:
                         print('Mean of residuals did not decrease, use the lower order model')
@@ -359,6 +369,14 @@ class HigherOrderMoments(TsRelBreakBase):
                                                 self.bias_corr_method)
 
         return df_adjust_resampled
+
+    @property
+    def ref_regress(self):
+        return self._ref_regress
+
+    @property
+    def obs_regress(self):
+        return self._obs_regress
 
     def plot_adjustments(self, *args, **kwargs):
         """
@@ -415,14 +433,14 @@ class HigherOrderMoments(TsRelBreakBase):
 
         # Create scatter plots for the 2 groups
         model_ax = axs[self.ref_group]
-        model_ax = self.ref_regress.plot(ax=model_ax)
+        model_ax = self._ref_regress.plot(ax=model_ax)
         title = self._model_plots_title_first_row(group_no=self.ref_group)
         if not supress_title:
             model_ax.set_title(title, fontsize=10)
 
         if plot_both:
             model_ax = axs[self.adj_group]
-            model_ax = self.obs_regress.plot(ax=model_ax)
+            model_ax = self._obs_regress.plot(ax=model_ax)
             if not supress_title:
                 title = self._model_plots_title_first_row(group_no=self.adj_group)
                 model_ax.set_title(title, fontsize=10)
@@ -571,7 +589,7 @@ class HigherOrderMoments(TsRelBreakBase):
         adjust_obj = HigherOrderMomentsAdjust(df_obs=self.obs,
                                               df_train=self.train,
                                               cdf_can_train=self.cdf_can_train,
-                                              regress=self.ref_regress,
+                                              regress=self._ref_regress,
                                               **adjustment_kwargs)
 
         adjusted_values = adjust_obj.adjust(values_to_adjust,
@@ -601,7 +619,7 @@ class HigherOrderMoments(TsRelBreakBase):
             Dictionary of model parameters of the selected model
         """
 
-        model_params = self.ref_regress.get_model_params()
+        model_params = self._ref_regress.get_model_params()
         try:
             cdf_type = self.adjust_obj.cdf_can_train.name
             lut = {'nor': 1, 'pe3': 2, 'gno': 3, 'gpa': 4, 'gev': 5, 'wak': 6}
