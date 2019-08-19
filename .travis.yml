@@ -34,9 +34,8 @@ install:
   - conda info -a
 
   - conda create -n pybreaks python=${TRAVIS_PYTHON_VERSION}
-  - conda env update -f environment.yml -n ecmwf-models
-  - source activate ecmwf-models
-
+  - conda env update -f environment.yml -n pybreaks
+  - source activate pybreaks
 
   - python setup.py develop
 
@@ -44,7 +43,6 @@ install:
   - pip list
   - which pip
   - which python
-
 
 script:
   - python setup.py test
