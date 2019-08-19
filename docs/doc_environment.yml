@@ -1,0 +1,10 @@
+# conda and pip requirements for the documentation part of the package
+name: pybreaks_docs
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+- ipywidgets
+- pip
+- pip:
+  - IPython

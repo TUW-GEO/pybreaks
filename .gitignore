@@ -3,7 +3,6 @@
 *.py[cod]
 *.so
 *.cfg
-!.isort.cfg
 !setup.cfg
 *.orig
 *.log
@@ -19,7 +18,6 @@ __pycache__/*
 .pydevproject
 .settings
 .idea
-tags
 
 # Package files
 *.egg
@@ -33,17 +31,12 @@ htmlcov/*
 .tox
 junit.xml
 coverage.xml
-.pytest_cache/
 
 # Build and docs folder/files
 build/*
 dist/*
 sdist/*
 docs/api/*
-docs/_rst/*
 docs/_build/*
 cover/*
 MANIFEST
-
-# Per-project virtualenvs
-.venv*/

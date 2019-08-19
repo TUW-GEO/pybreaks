@@ -1,31 +1,21 @@
 name: pybreaks
 channels:
   - conda-forge
+  - defaults
 dependencies:
 - setuptools
 - numpy
 - netCDF4
 - scipy
 - pandas
-#- typing
-#- toolz
-#- cartopy
+- pyproj # for pytesmo
+- pip
 - pip:
-#  - multiprocessing
   - datetime
-#  - smecv_grid
   - scikit-learn
-#  - rsdata
-#  - rsroot
-#  - pynetcf
-#  - pygeogrids
-#  - parse
-#  - pyyaml
   - statsmodels
-  - lmoments3
   - matplotlib
   - seaborn
-#  - xarray
+  - smecv_grid
   - pytesmo
-
-
+  - git+git://github.com/OpenHydrology/lmoments3.git@develop

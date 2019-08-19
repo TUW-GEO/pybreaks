@@ -1,82 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from datetime import datetime
-import pandas as pd
 import numpy as np
-from breakadjustment.standalone_functions import conditional_temp_resample
-from breakadjustment.temp_coverage import compare_temp_cov, drop_months_data
+from pybreaks.temp_coverage import compare_temp_cov, drop_months_data, count_M, count_D
 import numpy.testing as nptest
-
-
-
-def gen_diff_cover_data(monthly=False, rand1=0.5, rand2=0.5):
-
-    # Create a time series where the fist set covers mainly months in winter
-    # and the second time series mainly months in summer.
-
-    ds1, ds2, s1, e1, s2, e2 = gen_full_data(monthly, rand1, rand2)
-
-    # drop all DEC JAN FEB in 1
-    # drop all JUN JUL AUG in 2
-    for month in [12, 1, 2]:
-        ds1.loc[ds1.index.month == month ] = np.nan
-
-    for month in [6, 7, 8]:
-        ds2.loc[ds2.index.month == month ] = np.nan
-
-    return ds1, ds2, s1, e1, s2, e2
-
-
-def gen_full_data(monthly=False, rand1=0.5, rand2=0.5):
-    # 2 time series with  nans randomly placed
-    # for daily:
-    # first day that should have a value is 2000-4-3, last 2005-10-2 for ds1
-    # first day that should have a value is 2005-10-3, last 2008-8-3 for ds2
-    # for monthly:
-    # first month that should have a value is 2000-4-30, last 2005-09-31
-    # first day that should have a value is 2005-10-31, last 2008-8-31 for ds2
-
-    np.random.seed(282629734)
-
-    if monthly:
-        start1 = datetime(2000,4,30)
-        end1 = datetime(2005,9,30)
-        start2 = datetime(2005,10,31)
-        end2 = datetime(2008,8, 31)
-
-        index1 = pd.DatetimeIndex(start=start1, end=end1, freq='M')
-        index2 = pd.DatetimeIndex(start=start2, end=end2, freq='M')
-
-    else:
-        start1 = datetime(2000, 4, 3)
-        end1 = datetime(2005, 10, 2)
-        start2 = datetime(2005, 10, 3)
-        end2 = datetime(2008, 8, 3)
-
-        index1 = pd.DatetimeIndex(start=start1, end=end1, freq='D')
-        index2 = pd.DatetimeIndex(start=start2, end=end2, freq='D')
-
-    data1 = np.array([np.random.rand(index1.size)])
-    data2 = np.array([np.random.rand(index2.size)])
-
-    rand1 = int(data1.size * rand1)
-    rand2 = int(data2.size * rand2)
-
-    data1.ravel()[np.random.choice(data1.size, rand1, replace=False)] = np.nan
-    data2.ravel()[np.random.choice(data2.size, rand2, replace=False)] = np.nan
-
-
-    ds1 = pd.Series(index=index1, data=data1[0]).dropna()
-    ds2 = pd.Series(index=index2, data=data2[0]).dropna()
-
-
-    return ds1, ds2, start1, end1, start2, end2
-
-
-
+from tests.helper_functions import gen_full_data, gen_diff_cover_data
 
 def test_cover_full_D():
-
     ds1, ds2, s1, e1, s2, e2 = gen_full_data(False, 0, 0)
 
     success, cover0, cover1, dcover, mdrop = \
@@ -87,8 +16,6 @@ def test_cover_full_D():
     nptest.assert_almost_equal(cover0['coverage'].values, np.array([1.0] * 12))
     nptest.assert_almost_equal(cover1['coverage'].values, np.array([1.0] * 12))
     nptest.assert_almost_equal(mdrop, np.array([]))
-
-
 
 def test_cover_full_M():
     ds1, ds2, s1, e1, s2, e2 = gen_full_data(True, 0, 0)
@@ -101,7 +28,6 @@ def test_cover_full_M():
     nptest.assert_almost_equal(cover0['coverage'].values, np.array([1.0] * 12))
     nptest.assert_almost_equal(cover1['coverage'].values, np.array([1.0] * 12))
     nptest.assert_almost_equal(mdrop, np.array([]))
-
 
 def test_cover_part_D():
     ds1, ds2, s1, e1, s2, e2 = gen_diff_cover_data(False, 0, 0)
@@ -119,8 +45,6 @@ def test_cover_part_D():
     nptest.assert_almost_equal(cover1['coverage'].values, coverage1_shd)
     nptest.assert_almost_equal(mdrop, np.array([1,2,6,7,8,12]))
 
-
-
 def test_cover_part_M():
     ds1, ds2, s1, e1, s2, e2 = gen_diff_cover_data(True, 0, 0)
 
@@ -137,7 +61,31 @@ def test_cover_part_M():
     nptest.assert_almost_equal(cover1['coverage'].values, coverage1_shd)
     nptest.assert_almost_equal(mdrop, np.array([1,2,6,7,8,12]))
 
+def test_count_D():
+    # no missing days
+    ds1, _, start1, end1, _, _ = gen_full_data(False, rand1=0.)
+    df_count = count_D(ds1.index, start1, end1)
+    assert all(df_count['coverage'] == 1.)
+    np.testing.assert_equal(df_count['days_is'].values, df_count['days_max'].values)
 
+    # some missing days
+    ds1, _, start1, end1, _, _ = gen_full_data(False, rand1=0.5)
+    df_count = count_D(ds1.index, start1, end1)
+    assert not all(df_count['coverage'] == 1.)
+    assert any(np.not_equal(df_count['days_is'].values, df_count['days_max'].values))
+
+def test_count_M():
+    # no missing months
+    ds1, _, start1, end1, _, _ = gen_full_data(True, rand1=0.)
+    df_count = count_M(ds1.index, start1, end1)
+    assert all(df_count['coverage'] == 1.)
+    np.testing.assert_equal(df_count['months_is'].values, df_count['months_max'].values)
+
+    # some missing days
+    ds1, _, start1, end1, _, _ = gen_full_data(True, rand1=0.1)
+    df_count = count_M(ds1.index, start1, end1)
+    assert not all(df_count['coverage'] == 1.)
+    assert any(np.not_equal(df_count['months_is'].values, df_count['months_max'].values))
 
 def test_drop_uncoverd_months():
     ds1, ds2, s1, e1, s2, e2 = gen_diff_cover_data(False, 0, 0)
@@ -157,16 +105,10 @@ def test_drop_uncoverd_months():
     dropped_months0 = cover0.loc[np.isnan(cover0['coverage'])].index
     dropped_months1 = cover1.loc[np.isnan(cover1['coverage'])].index
 
-    nptest.assert_almost_equal(dropped_months0, dropped_months1)
+    nptest.assert_equal(dropped_months0.values, dropped_months1.values)
 
     assert(success==True)
     assert(mdrop.size==0)
-
-
-
-
-
-
 
 
 if __name__ == '__main__':
@@ -175,3 +117,5 @@ if __name__ == '__main__':
     test_cover_full_M()
     test_cover_part_D()
     test_cover_part_M()
+    test_count_D()
+    test_count_M()

@@ -1,12 +1,7 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Mai 24 15:17 2018
-
-@author: wpreimes
-"""
 import numpy as np
 from datetime import datetime
-from breakadjustment.timeframes import TsTimeFrames
+from pybreaks.timeframes import TsTimeFrames
 from smecv_grid.grid import SMECV_Grid_v042
 
 
