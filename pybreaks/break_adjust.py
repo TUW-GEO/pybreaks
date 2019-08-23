@@ -998,7 +998,7 @@ class TsRelBreakAdjust(TsRelBreakBase):
         return adjust_meta, test_meta
 
 def usecase_qcm():
-    from data_read_write.otherfunctions import smart_import
+    from io_data.otherfunctions import smart_import
 
     gpi = 707393  # bad: 395790,402962
     BREAKTIME = datetime(2012, 7, 1)
@@ -1076,7 +1076,7 @@ def usecase_qcm():
 
 
 def usecase_hom():
-    from data_read_write.otherfunctions import smart_import
+    from io_data.otherfunctions import smart_import
 
     gpi = 707393  # bad: 395790,402962
     BREAKTIME = datetime(2012, 7, 1)
@@ -1154,7 +1154,7 @@ def usecase_hom():
 
 
 def usecase_lmp():
-    from data_read_write.otherfunctions import smart_import
+    from io_data.otherfunctions import smart_import
 
     gpi = 707393  # bad: 395790,402962
     BREAKTIME = datetime(2012, 7, 1)
