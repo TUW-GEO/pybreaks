@@ -534,7 +534,7 @@ class LinearRegression(TsRelBreakBase):
             return np.nanmean((self.residuals ** 2).values)
 
 def usecase():
-    from data_read_write.otherfunctions import smart_import
+    from io_data.otherfunctions import smart_import
     from pprint import pprint
 
     gpi = 431790

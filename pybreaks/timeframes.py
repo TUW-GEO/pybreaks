@@ -159,7 +159,7 @@ class TsTimeFrames(object):
         '''
 
         candidate_range = [self.ranges[1], self.ranges[0]]
-        breaktimes = sorted(candidate_range + breaktimes.tolist(), reverse=True)
+        breaktimes = sorted(candidate_range + list(breaktimes), reverse=True)
 
         while True:
             restart = False

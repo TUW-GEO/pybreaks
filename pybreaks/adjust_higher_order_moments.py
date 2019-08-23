@@ -950,9 +950,8 @@ class HigherOrderMomentsAdjust(object):
 
 
 def usecase():
-    from cci_breaks.cci_timeframes import CCITimes
-    import os
-    from data_read_write.otherfunctions import smart_import
+    from cci_timeframes import CCITimes
+    from io_data.otherfunctions import smart_import
     import warnings
     import matplotlib
 

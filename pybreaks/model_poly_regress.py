@@ -364,8 +364,8 @@ class HigherOrderRegression(TsRelBreakBase):
 
 if __name__ == '__main__':
 
-    from cci_breaks.cci_timeframes import CCITimes
-    from data_read_write.otherfunctions import smart_import
+    from cci_timeframes import CCITimes
+    from io_data.otherfunctions import smart_import
 
     gpi = 431790
 
