@@ -270,9 +270,8 @@ class BreakAdjustInputCheck(TsRelBreakBase):
 
 
 if __name__ == '__main__':
-    from cci_breaks.cci_timeframes import CCITimes
-    import os
-    from data_read_write.otherfunctions import smart_import
+    from cci_timeframes import CCITimes
+    from io_data.otherfunctions import smart_import
 
     qdegdata = False
     gpi = 402962  # bad: 395790,402962
