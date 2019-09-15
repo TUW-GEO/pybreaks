@@ -6,6 +6,8 @@ TODO:
     - Test the corrections from core option
     - The function itself needs some updates and testing (lmoments)
 """
+import matplotlib # necessary in py2 but not in py 3
+matplotlib.use('Agg')
 
 from tests.helper_functions import read_test_data, create_artificial_test_data
 import unittest
@@ -16,6 +18,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys
 from pprint import pprint
+
 
 
 @unittest.skipIf(sys.version[0]=='2', 'lmoments3 only available for python 3')
