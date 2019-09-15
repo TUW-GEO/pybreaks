@@ -13,6 +13,8 @@ import numpy as np
 from pprint import pprint
 import matplotlib.pyplot as plt
 import pandas as pd
+import matplotlib
+matplotlib.use('Agg')
 
 
 class Test_qcm_realdata(unittest.TestCase):
