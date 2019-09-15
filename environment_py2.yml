@@ -10,12 +10,12 @@ dependencies:
 - pandas
 - pyproj # for pytesmo
 - pykdtree # for pytesmo
-- matplotlib
 - pip
 - pip:
   - datetime
   - scikit-learn
   - statsmodels
+  - matplotlib
   - seaborn
   - smecv_grid
   - pytesmo

@@ -15,7 +15,7 @@ try:
     from pybreaks.lmoments_ks import FitCDF
 except ImportError:
     print('Lmoments3 not found, attempting to import lmoments (2)')
-    from pybreaks.lmoments_ks_py2 import FitCDF2
+    from pybreaks.lmoments_ks_py2 import FitCDF2 as FitCDF
 
 '''
 Quanitify differences in 2 parts of a time series using the Higher Order Moments
