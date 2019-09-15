@@ -10,14 +10,14 @@ dependencies:
 - pandas
 - pyproj # for pytesmo
 - pykdtree # for pytesmo
+- matplotlib
 - pip
 - pip:
   - datetime
   - scikit-learn
   - statsmodels
-  - matplotlib
   - seaborn
   - smecv_grid
   - pytesmo
   - more_itertools
-  - git+git://github.com/OpenHydrology/lmoments3.git@develop
+  - lmoments

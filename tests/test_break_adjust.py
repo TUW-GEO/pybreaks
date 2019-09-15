@@ -3,6 +3,7 @@
 
 from tests.helper_functions import read_test_data, compare_metrics
 import unittest
+import sys
 from pybreaks.break_adjust import TsRelBreakAdjust
 from datetime import datetime, timedelta
 from pybreaks.utils import dt_freq
@@ -145,7 +146,7 @@ class Test_adjust_lmp(unittest.TestCase):
         # np.testing.assert_almost_equal(checkstats['can_bias_diff'],
         #     group_metrics['CAN_REF_mean_Diff_group1']-group_metrics['CAN_REF_mean_Diff_group0'])
 
-
+@unittest.skipIf(sys.version[0]=='2', 'lmoments3 only available for python 3')
 class Test_adjust_hom(unittest.TestCase):
 
     @classmethod

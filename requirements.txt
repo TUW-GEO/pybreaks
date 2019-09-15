@@ -15,4 +15,6 @@
 # numpy==1.13.3
 # scipy==1.0
 smecv_grid
-lmoments3
+lmoments; python_version < '3'
+lmoments3; python_version >= '3'
+more_itertools

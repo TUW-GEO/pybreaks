@@ -11,7 +11,11 @@ from scipy.interpolate import interp1d
 import statsmodels.api as sm
 from scipy.stats import ttest_rel, pearsonr
 import os
-from pybreaks.lmoments_ks import FitCDF
+try:
+    from pybreaks.lmoments_ks import FitCDF
+except ImportError:
+    print('Lmoments3 not found, attempting to import lmoments (2)')
+    from pybreaks.lmoments_ks_py2 import FitCDF2
 
 '''
 Quanitify differences in 2 parts of a time series using the Higher Order Moments
@@ -949,66 +953,5 @@ class HigherOrderMomentsAdjust(object):
         return values_to_adjust['adjusted']
 
 
-def usecase():
-    from cci_timeframes import CCITimes
-    from io_data.otherfunctions import smart_import
-    import warnings
-    import matplotlib
-
-    matplotlib.use('Agg')
-    warnings.filterwarnings('always')
-
-    gpi = 323864  # bad: 395790,402962
-    canname = 'CCI_44_COMBINED'
-    refname = 'MERRA2'
-
-    breaktime = datetime(2012, 7, 1)
-
-    times = CCITimes('CCI_44_COMBINED', min_set_days=None, skip_breaktimes=[1, 3]). \
-        get_times(gpi=gpi)
-
-    ts_full, plotpath = smart_import(gpi, canname, refname)
-
-    ds = TsRelBreakBase(ts_full[canname], ts_full[refname], breaktime,
-                        bias_corr_method='cdf_match', dropna=False)
-
-    ts_full = ds.df_original[[canname, refname]].copy(True)
-
-    ts_full['original'] = ts_full[canname].copy(True)
-
-    timeframe = times['timeframes'][0]
-
-    ts_frame = ts_full[datetime(2010, 1, 1): timeframe[1]].copy(True)
-
-    obj = HigherOrderMoments(
-        ts_frame[canname],
-        ts_frame[refname],
-        breaktime,
-        regress_resample=None,
-        bias_corr_method='linreg',
-        filter=('both', 5),
-        adjust_group=0,
-        poly_orders=[2, 3],
-        cdf_types=None)
-
-    '''
-    obj.cdf_can_train.plot_pdf()
-    obj.cdf_can_train.plot_cdf()
-    obj._cdf_can_obs.plot_pdf()
-    obj._cdf_can_obs.plot_cdf()
-    obj._cdf_can_pred.plot_pdf()
-    obj._cdf_can_pred.plot_cdf()
-    obj.plot_cdf_compare_separate()
-    obj.plot_cdf_compare()
-    # obj.plot_models(plot_both=True)
-    '''
-    values_to_adjust = ts_full.loc['2002-01-01':breaktime, canname]
-    adj = obj.adjust(values_to_adjust=values_to_adjust, use_separate_cdf=False,
-                     alpha=0.6, from_bins=True)
-    ts_full['adj'] = adj
-    obj.plot_adjustments()
-    pass
-
-
 if __name__ == '__main__':
-    usecase()
+    pass

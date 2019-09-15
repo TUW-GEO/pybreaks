@@ -11,6 +11,7 @@ Test the MultiBreakAdjustment module.
 
 from tests.helper_functions import read_test_data, compare_metrics
 import unittest
+import sys
 from pybreaks.break_multi import TsRelMultiBreak
 from datetime import datetime, timedelta
 from pybreaks.utils import dt_freq
@@ -131,7 +132,7 @@ class Test_multibreak_adjust_lmp(unittest.TestCase):
         assert testresults_ifirst['h_MEAN'] == 1
         assert testresults_ilast['h_MEAN'] == 0
 
-
+@unittest.skipIf(sys.version[0]=='2', 'lmoments3 only available for python 3')
 class Test_multibreak_adjust_hom(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
