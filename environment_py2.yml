@@ -20,4 +20,4 @@ dependencies:
   - smecv_grid
   - pytesmo
   - more_itertools
-  - git+git://github.com/OpenHydrology/lmoments3.git@develop
+  - lmoments

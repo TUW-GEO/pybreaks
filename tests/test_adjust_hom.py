@@ -18,7 +18,7 @@ import sys
 from pprint import pprint
 
 
-#@unittest.skipIf(sys.version[0]=='2', 'lmoments3 only available for python 3')
+@unittest.skipIf(sys.version[0]=='2', 'lmoments3 only available for python 3')
 class Test_hom_lmom3_realdata_model_m(unittest.TestCase):
 
     @classmethod
@@ -95,7 +95,7 @@ class Test_hom_lmom3_realdata_model_m(unittest.TestCase):
         np.testing.assert_almost_equal(model['filter_p'],  5.)
 
 
-#@unittest.skipIf(sys.version[0]=='2', 'lmoments3 only available for python 3')
+@unittest.skipIf(sys.version[0]=='2', 'lmoments3 only available for python 3')
 class Test_hom_lmom3_realdata_model_d(unittest.TestCase):
 
     @classmethod
@@ -181,7 +181,7 @@ class Test_hom_lmom3_realdata_model_d(unittest.TestCase):
         assert all(self.can_adjusted_bins == (self.values_to_adjust - corrections)) # todo: this should be +
         assert self.can_adjusted_bins.index.size == self.values_to_adjust.index.size
 
-#@unittest.skipIf(sys.version[0]=='2', 'lmoments3 only available for python 3')
+@unittest.skipIf(sys.version[0]=='2', 'lmoments3 only available for python 3')
 class Test_hom_lmom3_synthetic_model_d(unittest.TestCase):
 
     @classmethod
