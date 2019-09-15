@@ -16,3 +16,4 @@
 # scipy==1.0
 smecv_grid
 lmoments3
+more_itertools
