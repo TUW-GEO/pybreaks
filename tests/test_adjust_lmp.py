@@ -6,6 +6,9 @@ TODO:
     - Test the corrections from core option
 """
 
+import matplotlib # necessary in py2 but not in py 3
+matplotlib.use('Agg')
+
 from tests.helper_functions import read_test_data, create_artificial_test_data
 import unittest
 from pybreaks.adjust_linear_model_pair_fitting import RegressPairFit, PairRegressMatchAdjust
