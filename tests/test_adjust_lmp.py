@@ -13,8 +13,6 @@ from datetime import datetime, timedelta
 from pybreaks.utils import dt_freq
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib
-matplotlib.use('Agg')
 
 class Test_lmp_realdata_model_m(unittest.TestCase):
 
