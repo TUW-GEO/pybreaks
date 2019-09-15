@@ -19,7 +19,6 @@ install:
   # conditionally because it saves us some downloading if the version is
   # the same.
 
-  # reshuffling multiple params for py3 results in a bad chunk size error unless netcdf4 is downgraded
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
       wget http://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
     else
