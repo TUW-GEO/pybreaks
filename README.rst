@@ -2,6 +2,8 @@
 pybreaks
 ========
 
+.. image:: https://travis-ci.com/wpreimes/pybreaks.svg?token=EMNRtJMV9D8ioyMpm5R1&branch=master
+    :target: https://travis-ci.com/wpreimes/pybreaks
 
 Detection and correction of structural breaks in climate time series.
 
