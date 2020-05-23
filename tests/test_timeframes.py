@@ -143,12 +143,13 @@ def test_timeframes_from_breaktimes_and_viceversa_base_breaktime():
 
 
 if __name__ == '__main__':
+    test_timeframes_from_breaktimes_mindata()
+
     test_std_get_times()
     test_as_datetime()
     test_gpi_dep_get_times_no_base()
     test_timeframes_gpi_dep_base()
     test_timeframes_from_breaktimes_skip()
-    test_timeframes_from_breaktimes_mindata()
     test_adjacent()
     test_timeframes_from_breaktimes_and_viceversa_base_breaktime()
 
