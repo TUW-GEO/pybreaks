@@ -96,28 +96,3 @@ jobs:
           pip3 install --upgrade coveralls && coveralls --service=github --finish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  publish:
-    name: Upload to PyPI
-    if: |
-      startsWith(github.ref, 'refs/tags/v') &&
-      startsWith(github.repository, 'TUW-GEO')
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Print environment variables
-        run: |
-          echo "GITHUB_REF = $GITHUB_REF"
-          echo "GITHUB_REPOSITORY = $GITHUB_REPOSITORY"
-      - name: Download Artifacts
-        uses: actions/download-artifact@v2
-      - name: Display downloaded files
-        run: ls -aR
-      - name: Upload to PyPI
-        uses: pypa/gh-action-pypi-publish@v1.4.1
-        with:
-          skip_existing: true
-          verbose: true
-          verify_metadata: true
-          packages_dir: Artifacts/dist/
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }} # this needs to be uploaded to github actions secrets
