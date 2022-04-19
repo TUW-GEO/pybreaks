@@ -33,7 +33,7 @@ Documentation
 
 Methods in this package are described in
 
-    W. Preimesberger, T. Scanlon, C. -H. Su, A. Gruber and W. Dorigo, "Homogenization of Structural Breaks in the Global ESA CCI Soil Moisture Multisatellite Climate Data Record," in IEEE Transactions on Geoscience and Remote Sensing, vol. 59, no. 4, pp. 2845-2862, April 2021, doi: 10.1109/TGRS.2020.3012896.
+   "W. Preimesberger, T. Scanlon, C. -H. Su, A. Gruber and W. Dorigo, "Homogenization of Structural Breaks in the Global ESA CCI Soil Moisture Multisatellite Climate Data Record," in IEEE Transactions on Geoscience and Remote Sensing, vol. 59, no. 4, pp. 2845-2862, April 2021, doi: 10.1109/TGRS.2020.3012896."
 
 Note
 ====
