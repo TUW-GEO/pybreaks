@@ -2,13 +2,14 @@
 pybreaks
 ========
 
-.. image:: https://travis-ci.com/wpreimes/pybreaks.svg?token=EMNRtJMV9D8ioyMpm5R1&branch=master
-    :target: https://travis-ci.com/wpreimes/pybreaks
+.. image:: https://github.com/TUW-GEO/pybreaks/workflows/Automated%20Tests/badge.svg?branch=master
+   :target: https://github.com/TUW-GEO/pybreaks/actions
 
 Detection and correction of structural breaks in (climate) time series.
 
 This packages depends on the `lmoments3` package. In particular,
 you need to install this fork: https://github.com/wpreimes/lmoments3
+(the correct commit is set in the ``./environment.yml`` file)
 
 Description
 ===========
@@ -30,7 +31,9 @@ The main modules in the package are:
 Documentation
 ==============
 
-Detailled documentation will follow shortly...
+Methods in this package are described in
+
+    W. Preimesberger, T. Scanlon, C. -H. Su, A. Gruber and W. Dorigo, "Homogenization of Structural Breaks in the Global ESA CCI Soil Moisture Multisatellite Climate Data Record," in IEEE Transactions on Geoscience and Remote Sensing, vol. 59, no. 4, pp. 2845-2862, April 2021, doi: 10.1109/TGRS.2020.3012896.
 
 Note
 ====
