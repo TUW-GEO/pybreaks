@@ -165,11 +165,11 @@ class TsTimeFrames(object):
             restart = False
             for i in range(1, len(breaktimes) - 1):
                 end, breaktime, start = breaktimes[i - 1], breaktimes[i], breaktimes[i + 1]
-                if pd.date_range(start=breaktime, end=end, freq='D').size < days_min:
+                if pd.date_range(start=str(breaktime), end=str(end), freq='D').size < days_min:
                     breaktimes.remove(breaktime)
                     restart = True
                     break
-                if pd.date_range(start=start, end=breaktime, freq='D').size < days_min:
+                if pd.date_range(start=str(start), end=str(breaktime), freq='D').size < days_min:
                     breaktimes.remove(breaktime)
                     restart = True
                     break

@@ -8,8 +8,8 @@ dependencies:
 - netCDF4
 - scipy
 - pandas
-- pyproj # for pytesmo
-- pykdtree # for pytesmo
+- pyproj
+- pykdtree
 - pip
 - pip:
   - datetime
@@ -20,4 +20,6 @@ dependencies:
   - smecv_grid
   - pytesmo
   - more_itertools
-  - git+git://github.com/OpenHydrology/lmoments3.git@develop
+  - git+https://github.com/wpreimes/lmoments3@7e19f97c23019ca68cbd526b8bd417c412438f1c
+  - pytest
+  - pytest-cov

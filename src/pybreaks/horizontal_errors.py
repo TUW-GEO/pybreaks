@@ -206,7 +206,7 @@ class HorizontalVal(object):
             Change of metrics between the groups across the break time.
         '''
 
-        df_metric_change = pd.Series()
+        df_metric_change = pd.Series(dtype='float64')
 
         for var, meth in self.stats:
             s0 = df_groupstats_compare.loc['%s_%s' % (var, meth), 'group0']

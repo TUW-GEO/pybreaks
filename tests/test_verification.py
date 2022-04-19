@@ -44,7 +44,7 @@ class TestHorizontalErrors(unittest.TestCase):
 
         bias_diff = df_change['{}_bias'.format(comparison_method)]
 
-        assert bias_diff == mean_diff
+        np.testing.assert_almost_equal(bias_diff, mean_diff)
 
         rmsd_diff = df_change['{}_rmsd'.format(comparison_method)]
         nrmsd_diff = df_change['{}_nrmsd'.format(comparison_method)]

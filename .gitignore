@@ -3,6 +3,7 @@
 *.py[cod]
 *.so
 *.cfg
+!.isort.cfg
 !setup.cfg
 *.orig
 *.log
@@ -11,6 +12,7 @@ __pycache__/*
 .cache/*
 .*.swp
 */.ipynb_checkpoints/*
+.DS_Store
 
 # Project files
 .ropeproject
@@ -18,6 +20,8 @@ __pycache__/*
 .pydevproject
 .settings
 .idea
+.vscode
+tags
 
 # Package files
 *.egg
@@ -28,15 +32,23 @@ __pycache__/*
 # Unittest and coverage
 htmlcov/*
 .coverage
+.coverage.*
 .tox
-junit.xml
+junit*.xml
 coverage.xml
+.pytest_cache/
 
 # Build and docs folder/files
 build/*
 dist/*
 sdist/*
 docs/api/*
+docs/_rst/*
 docs/_build/*
 cover/*
 MANIFEST
+
+# Per-project virtualenvs
+.venv*/
+.conda*/
+.python-version
