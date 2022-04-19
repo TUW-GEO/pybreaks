@@ -11,11 +11,8 @@ from scipy.interpolate import interp1d
 import statsmodels.api as sm
 from scipy.stats import ttest_rel, pearsonr
 import os
-try:
-    from pybreaks.lmoments_ks import FitCDF
-except ImportError:
-    print('Lmoments3 not found, attempting to import lmoments (2)')
-    from pybreaks.lmoments_ks_py2 import FitCDF2 as FitCDF
+from pybreaks.lmoments_ks import FitCDF
+
 
 '''
 Quanitify differences in 2 parts of a time series using the Higher Order Moments

@@ -37,14 +37,14 @@ def create_artificial_test_data(type):
         # data with a var break
         df = pd.DataFrame(index= pd.date_range(start='2000-01-01',
                                                end='2000-12-31', freq='D'),
-                          data = {'candidate': ([10 , 50] * 91 + [30,31] * 92),
-                                  'reference': ([30,31] * 183)})
+                          data = {'candidate': ([10. , 50.] * 91 + [30.,31.] * 92),
+                                  'reference': ([30.,31.] * 183)})
     elif type == 'mean':
         # data with a mean break
         df = pd.DataFrame(index= pd.date_range(start='2000-01-01',
                                                end='2000-12-31', freq='D'),
-                          data = {'candidate': ([10,11]*(91) + [50,51]*(92)),
-                                  'reference': [30, 31] * 183})
+                          data = {'candidate': ([10.,11.]*(91) + [50.,51.]*(92)),
+                                  'reference': [30., 31.] * 183})
     elif type == 'norm_mean':
         # data with a mean break
         np.random.seed(12345)
@@ -69,13 +69,13 @@ def create_artificial_test_data(type):
     elif type == 'asc': # ascending candiate
         df = pd.DataFrame(index=pd.date_range(start='2000-01-01',
                                               end='2000-12-31', freq='D'),
-                          data={'candidate': range(366),
-                                'reference': [366] * 366})
+                          data={'candidate': np.arange(366.),
+                                'reference': [366.] * 366})
     elif type == 'asc2': # both ascending
         df = pd.DataFrame(index=pd.date_range(start='2000-01-01',
                                               end='2000-12-31', freq='D'),
-                          data={'candidate': range(366),
-                                'reference': range(10, 366+10)})
+                          data={'candidate': np.arange(366.),
+                                'reference': np.arange(10., 366.+10.)})
 
     else:
         df = None
