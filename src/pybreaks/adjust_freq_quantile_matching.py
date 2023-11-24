@@ -735,7 +735,7 @@ class QuantileCatMatch(TsRelBreakBase):
             if df_middle.index[0] in cat.index:
                 cat.at[df_middle.index[0], 'adj'] = df_middle['adj'].values[0]
             else:
-                cat = cat.append(df_middle, sort=True).sort_index()
+                cat = pd.concat((cat, df_middle), sort=True).sort_index()
 
             cats.append(cat)
 
@@ -763,7 +763,7 @@ class QuantileCatMatch(TsRelBreakBase):
                 df_firstlast = df_firstlast.drop(df_firstlast.index[-1])
 
             if not df_firstlast.empty:
-                d_mean = d_mean.append(df_firstlast, sort=True).sort_index()
+                d_mean = pd.concat((d_mean, df_firstlast), sort=True).sort_index()
         else:
             d_mean = d_mean.sort_index()
 

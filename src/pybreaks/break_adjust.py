@@ -372,6 +372,9 @@ class TsRelBreakAdjust(TsRelBreakBase):
             numrows = 0
             for j in range(plot_row_counter):
                 numrows = plot_row_counter + 1
+
+                raise NotImplementedError('matplotlib.axes._subplots.change_geometry is non supported anymore')
+
                 self.plot_collection_figure.axes[ppr * j]. \
                     change_geometry(numrows, ppr, ppr * j + 1)
                 self.plot_collection_figure.axes[ppr * j + 1]. \

@@ -336,7 +336,6 @@ class LinearRegression(TsRelBreakBase):
         n = candidate_data.index.size
 
         model = sklearnmodel.LinearRegression(fit_intercept=fit_intercept,
-                                              normalize=False,
                                               copy_X=True)
 
         X = reference_data.values.reshape(-1, 1)
