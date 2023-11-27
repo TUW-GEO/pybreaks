@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime
-import collections
+from collections.abc import Iterable
 
 import pandas as pd
 import numpy as np
@@ -205,7 +205,7 @@ def crosscorr(can, ref, lag=0, method='spearman'):
         Cross correlations between can and ref for the selected time lag(s)
     """
 
-    if not isinstance(lag, collections.Iterable):
+    if not isinstance(lag, Iterable):
         return ref.corr(can.shift(lag), method=method)
     else:
         return [ref.corr(can.shift(lag), method=method) for lag in lag]
@@ -230,7 +230,7 @@ def autocorr(can, lag=0, method='spearman'):
         Auto correlations between can and ref for the selected time lag(s)
     """
 
-    if not isinstance(lag, collections.Iterable):
+    if not isinstance(lag, Iterable):
         return can.corr(can.shift(lag), method=method)
     else:
         return [can.corr(can.shift(lag), method=method) for lag in lag]
@@ -278,7 +278,7 @@ def days_in_month(month, year, astype=int):
     days : np.array of float
         Days in the passed months
     '''
-    if isinstance(month, collections.Iterable):
+    if isinstance(month, Iterable):
         if isinstance(year, int):
             year = np.full(len(month), year)
 
