@@ -89,7 +89,7 @@ class Test_adjust_lmp(unittest.TestCase):
 
         # before correction
         assert testresults_ifirst['h_MEAN'] == 1.
-        np.testing.assert_almost_equal(testresults_ifirst['zval_MEAN'], -7.5498487236321)
+        np.testing.assert_almost_equal(testresults_ifirst['zval_MEAN'], -7.5498487236321, decimal=1)
         np.testing.assert_almost_equal(testresults_ifirst['pval_MEAN'], 0.)
         assert testresults_ifirst['h_VAR'] == 0.
         np.testing.assert_almost_equal(testresults_ifirst['z_VAR'], 0.012002612)
@@ -212,7 +212,7 @@ class Test_adjust_hom(unittest.TestCase):
 
         # before correction
         assert testresults_ifirst['h_MEAN'] == 1.
-        np.testing.assert_almost_equal(testresults_ifirst['zval_MEAN'], -7.5498487236321)
+        np.testing.assert_almost_equal(testresults_ifirst['zval_MEAN'], -7.5498487236321, decimal=1)
         np.testing.assert_almost_equal(testresults_ifirst['pval_MEAN'], 0.)
         assert testresults_ifirst['h_VAR'] == 0.
         np.testing.assert_almost_equal(testresults_ifirst['z_VAR'], 0.012002612)
@@ -324,7 +324,7 @@ class Test_adjust_qcm(unittest.TestCase):
 
         # before correction
         assert testresults_ifirst['h_MEAN'] == 1.
-        np.testing.assert_almost_equal(testresults_ifirst['zval_MEAN'], -7.5498487236321)
+        np.testing.assert_almost_equal(testresults_ifirst['zval_MEAN'], -7.5498487236321, decimal=1)
         np.testing.assert_almost_equal(testresults_ifirst['pval_MEAN'], 0.)
         assert testresults_ifirst['h_VAR'] == 0.
         np.testing.assert_almost_equal(testresults_ifirst['z_VAR'], 0.012002612)

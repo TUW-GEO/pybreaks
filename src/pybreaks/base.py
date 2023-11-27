@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 
-from pytesmo.scaling import linreg_stored_params, linreg_params, \
-    lin_cdf_match_stored_params, mean_std, min_max
+from pytesmo.scaling import linreg_stored_params, linreg_params, mean_std, min_max
+from pytesmo.cdf_matching import CDFMatching
 import pandas as pd
 from datetime import datetime
 import numpy as np
@@ -232,15 +232,13 @@ class TsRelBreakBase(object):
                     linreg_stored_params(df[self.reference_col_name], slope, inter)
             elif method == 'cdf_match':
                 percentiles = [0, 5, 10, 30, 50, 70, 90, 95, 100]
-                if can.size != 0 and src.size != 0:
-                    perc_can = np.array(np.percentile(can, percentiles))
-                    perc_src = np.array(np.percentile(src, percentiles))
+                matcher = CDFMatching(percentiles=percentiles, )
+                matcher.fit(src, can)
+                scaled = matcher.predict(df[self.reference_col_name])
+                scaled[scaled < 0] = 0
 
-                    df[self.reference_col_name] = \
-                        lin_cdf_match_stored_params(df[self.reference_col_name].values,
-                                                    perc_src,
-                                                    perc_can,
-                                                    min_val=0, max_val=None)
+                df[self.reference_col_name] = scaled
+
             elif method == 'mean_std':
                 df[self.reference_col_name] = mean_std(src, can)
             elif method == 'min_max':
