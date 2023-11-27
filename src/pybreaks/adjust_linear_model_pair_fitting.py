@@ -12,8 +12,7 @@ from pybreaks.utils import df_conditional_temp_resample, \
 import os
 from scipy.interpolate import interp1d
 import calendar
-import collections
-
+from collections.abc import Iterable
 
 '''
 Module implements the Linear Model Pair adjustment, based on the suggestions
@@ -268,7 +267,7 @@ class RegressPairFit(TsRelBreakBase):
         models = [self.model0, self.model1]
 
         if axs is not None:
-            if not (isinstance(axs, collections.Iterable) and (len(axs) == len(models))):
+            if not (isinstance(axs, Iterable) and (len(axs) == len(models))):
                 raise Exception('Wrong number of axes passed')
             else:
                 if image_path:
