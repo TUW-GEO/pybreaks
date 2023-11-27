@@ -7,10 +7,6 @@ pybreaks
 
 Detection and correction of structural breaks in (climate) time series.
 
-This packages depends on the `lmoments3` package. In particular,
-you need to install this fork: https://github.com/wpreimes/lmoments3
-(the correct commit is set in the ``./environment.yml`` file)
-
 Description
 ===========
 
