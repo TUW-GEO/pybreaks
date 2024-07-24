@@ -237,7 +237,8 @@ class HorizontalVal(object):
         df_validation_metrics = pd.DataFrame()
 
         for group_no, subset_data in enumerate([self.set0, self.set1, self.setfull]):
-            if group_no in [0,1]:
+            subset_data = subset_data.astype(np.float32)
+            if group_no in [0, 1]:
                 group = 'group%i' % group_no
             else:
                 group = 'FRAME'

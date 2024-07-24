@@ -44,12 +44,13 @@ class TestHorizontalErrors(unittest.TestCase):
 
         bias_diff = df_change['{}_bias'.format(comparison_method)]
 
-        np.testing.assert_almost_equal(bias_diff, mean_diff)
+        np.testing.assert_almost_equal(bias_diff, mean_diff, 5)
 
         rmsd_diff = df_change['{}_rmsd'.format(comparison_method)]
         nrmsd_diff = df_change['{}_nrmsd'.format(comparison_method)]
 
-        assert rmsd_diff == nrmsd_diff == 0
+        np.testing.assert_almost_equal(rmsd_diff, 0, 5)
+        np.testing.assert_almost_equal(nrmsd_diff, 0, 5)
 
         can_0_min = df_groupstats.loc['min_candidate', 'group0']
         can_1_min = df_groupstats.loc['min_candidate', 'group1']

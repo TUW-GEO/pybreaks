@@ -24,7 +24,7 @@ def test_conditional_temp_resample():
     assert dt_freq(ds.index) == (1., 'D')
 
     resampled, count = conditional_temp_resample(ds, 'M', threshold=0.1)
-    assert dt_freq(resampled.index) == (1., 'M')
+    assert dt_freq(resampled.index) == (1., 'ME')
     np.testing.assert_almost_equal(count['count_is'], should_days_in_month)
     np.testing.assert_almost_equal(count['count_should'], should_days_in_month / 10.)
     assert all(resampled.values == 1.)
@@ -36,7 +36,7 @@ def test_df_conditional_temp_resample():
 
     resampled = df_conditional_temp_resample(df, 'M', resample_threshold=0.1)
     assert dt_freq(df.index) == (1., 'D')
-    assert dt_freq(resampled.index) == (1., 'M')
+    assert dt_freq(resampled.index) == (1., 'ME')
     assert all(resampled['data1'].values == 1.)
     assert all(resampled['data2'].values == 10.)
 
@@ -85,7 +85,7 @@ def test_midmonth_target_values():
 def test_dt_freq():
     ts = read_test_data(654079)
     assert dt_freq(ts.index) == (1., 'D')
-    assert dt_freq(ts['CCI'].dropna().resample('M').mean().index) == (1., 'M')
+    assert dt_freq(ts['CCI'].dropna().resample('M').mean().index) == (1., 'ME')
 
 
 if __name__ == '__main__':

@@ -87,7 +87,7 @@ class Test_adjust_lmp(unittest.TestCase):
         assert self.src.testresult['mean']['stats']['zval'] == testresults_ilast['zval_MEAN']
 
         (res, freq) = dt_freq(self.src.adjust_obj.df_adjust.index)
-        assert (res, freq) == (1., 'M')
+        assert (res, freq) == (1., 'ME')
 
         # before correction
         assert testresults_ifirst['h_MEAN'] == 1.
