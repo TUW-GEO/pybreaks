@@ -4,7 +4,7 @@ channels:
   - defaults
 dependencies:
 - setuptools
-- numpy
+- numpy<2.0
 - netCDF4
 - scipy
 - pandas
@@ -20,5 +20,6 @@ dependencies:
   - smecv_grid
   - pytesmo
   - more_itertools
+  - lmoments3
   - pytest
   - pytest-cov
