@@ -3,7 +3,6 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-- python=3.10
 - setuptools
 - numpy<2.0
 - netCDF4
