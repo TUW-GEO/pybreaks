@@ -536,8 +536,3 @@ class TsRelBreakTest(TsRelBreakBase):
         test_meta = OrderedDict(cont)
 
         return test_meta
-
-
-if __name__ == '__main__':
-    pass
-

@@ -29,8 +29,8 @@ def load_test_data(trend=0.01, bias=0.1, breaktime=datetime(2012,7,1), breaksize
     rand_ref = pd.Series(index=dt_index, data=np.random.normal(
         loc=0., scale=0.05, size=3287), name='REF')
 
-    can = s_seasonality + s_trend + rand_can.values + bias
-    ref = s_seasonality + s_trend + rand_ref.values
+    can = s_seasonality + s_trend + rand_can + bias
+    ref = s_seasonality + s_trend + rand_ref
 
     # additive and multiplicative relative bias
     break_index=can.loc[:breaktime].index
