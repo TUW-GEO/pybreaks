@@ -286,8 +286,8 @@ class Test_lmp_synthetic_model_d(unittest.TestCase):
 
         # also get corrections from interpolated M values - must be same for the
         # synthetic case.
-        assert np.alltrue(np.equal(self.can_adjusted_direct.values, self.can_adjusted.values))
-        assert np.alltrue(np.equal(self.can_adjusted_nocore.values, self.can_adjusted.values))
+        assert np.all(np.equal(self.can_adjusted_direct.values, self.can_adjusted.values))
+        assert np.all(np.equal(self.can_adjusted_nocore.values, self.can_adjusted.values))
 
 
 if __name__ == '__main__':

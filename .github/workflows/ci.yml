@@ -4,7 +4,7 @@
 # For more information see:
 # https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
-name: Automated Tests
+name: CI/CD
 
 on:
   push:
@@ -14,90 +14,103 @@ jobs:
   build:
     strategy:
       matrix:
-        python-version: ['3.9', '3.10']
-        os: ["ubuntu-latest"]
         include:
+          - os: "ubuntu-latest"
+            python-version: '3.10'  # first supported
           - os: "windows-latest"
-            python-version: '3.10'
-    name: Py${{ matrix.python-version }}@${{ matrix.os }}🐍
+            python-version: '3.10'  # first supported
+          - os: "macos-latest"
+            python-version: '3.10'  # first supported
+          - os: "ubuntu-latest"
+            python-version: '3.12'  # latest supported
+          - os: "windows-latest"
+            python-version: '3.12'  # latest supported
+          - os: "macos-latest"
+            python-version: '3.12'  # latest supported
+    name: Py${{ matrix.python-version }}@${{ matrix.os }}
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
-          submodules: true # does not work with self-hosted testdata
+          submodules: true
           fetch-depth: 0
-
+          lfs: true
       - uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
           channel-priority: flexible
-          mamba-version: "*"
-          environment-file: "environment.yml"
           activate-environment: pybreaks
           auto-activate-base: false
       - name: Print Infos
         shell: bash -l {0}
         run: |
-          git status
           conda info -a
           conda list
           pip list
           which pip
           which python
+      - name: Install dependencies and package
+        shell: bash -l {0}
+        run: |
+          pip install -e .[building,testing]
+      - name: Run tests
+        shell: bash -l {0}
+        run: |
+          pytest
       - name: Export Environment
         shell: bash -l {0}
         run: |
-          mkdir -p .artifacts
+          mkdir -p artifacts
           filename=env_py${{ matrix.python-version }}_${{ matrix.os }}.yml
-          conda env export --no-builds | grep -v "prefix" > .artifacts/$filename
-      - name: Install package and test
+          conda env export --no-builds | grep -v "prefix" > artifacts/$filename
+      - name: Create wheel and dist package
         shell: bash -l {0}
         run: |
-          pip install -e .
-          pytest --cache-clear
+          mkdir -p artifacts/dist
+          if [ ${{ matrix.os }} == "ubuntu-latest" ]
+          then
+            # build dist on linux
+            python -m build --outdir artifacts/dist
+          fi
+          python setup.py bdist_wheel --dist-dir artifacts/dist
+          ls artifacts/dist
+          twine check artifacts/dist/*
       - name: Upload Coverage
         shell: bash -l {0}
         run: |
-          pip install coveralls && coveralls --service=github
+          pip install coveralls && coveralls --service=github-actions
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_FLAG_NAME: ${{ matrix.python-version }}
           COVERALLS_PARALLEL: true
-      - name: Create wheel and dist package
-        shell: bash -l {0}
-        run: |
-          pip install setuptools_scm
-          if [ ${{ matrix.os }} == "windows-latest" ]
-          then
-            # build whls on windows
-            pip install wheel
-            python setup.py bdist_wheel --dist-dir .artifacts/dist
-          else
-            # build dist on linux
-            python setup.py sdist --dist-dir .artifacts/dist
-          fi
-          ls .artifacts/dist
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
-          name: Artifacts
-          path: .artifacts/*
+          name: Artifacts-py${{ matrix.python-version }}-${{ matrix.os }}
+          path: artifacts/*
+
   coveralls:
     name: Submit Coveralls 👚
     needs: build
     runs-on: ubuntu-latest
     container: python:3-slim
     steps:
-      - name: Finished
+      - name: Finalize Coveralls Parallel Build
         run: |
-          pip3 install --upgrade coveralls && coveralls --service=github --finish
+          pip3 install --upgrade coveralls
+          coveralls --finish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  publish:
-    name: Upload to PyPI 🚀
-    if: startsWith(github.ref, 'refs/tags/v') && startsWith(github.repository, 'TUW-GEO')
+          COVERALLS_SERVICE_NAME: github-actions
+
+  publish-pypi-package:
+    name: Publish PyPI 🚀
+    # Will only trigger when Tests have passed on release/tag from the TUW-GEO repository
+    if: |
+      startsWith(github.ref, 'refs/tags/v') &&
+      startsWith(github.repository, 'TUW-GEO')
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -106,15 +119,19 @@ jobs:
           echo "GITHUB_REF = $GITHUB_REF"
           echo "GITHUB_REPOSITORY = $GITHUB_REPOSITORY"
       - name: Download Artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
+        with:
+          path: Artifacts
+          pattern: Artifacts-*
+          merge-multiple: true
       - name: Display downloaded files
         run: ls -aR
       - name: Upload to PyPI
-        uses: pypa/gh-action-pypi-publish@v1.4.1
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          skip_existing: true
+          skip-existing: true
           verbose: true
-          verify_metadata: true
-          packages_dir: Artifacts/dist/
+          verify-metadata: true
+          packages-dir: Artifacts/dist/
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }} # this needs to be uploaded to github actions secrets
