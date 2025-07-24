@@ -76,7 +76,7 @@ zip-safe = false
 package-dir = { "" = "src" }
 
 [tool.pytest.ini_options]
-addopts = "--cov ecmwf_models --cov-report term-missing --verbose"
+addopts = "--cov pybreaks --cov-report term-missing --verbose"
 norecursedirs = ["dist", "build", ".tox"]
 testpaths = ["tests"]
 
